@@ -1,0 +1,242 @@
+#property strict
+
+string filename = "features_mt5.csv";
+
+datetime last_bar = 0;
+bool header_written = false;
+
+// ===== FUNÇÕES BASE =====
+
+double Ret(int shift)
+{
+   double c1 = iClose(_Symbol,_Period,shift);
+   double c2 = iClose(_Symbol,_Period,shift+1);
+   if(c2 == 0) return 0;
+   return (c1 - c2)/c2;
+}
+
+// ATR percentual
+double ATR_pct(int period=14)
+{
+   double atr = iATR(_Symbol,_Period,period,1);
+   double close = iClose(_Symbol,_Period,1);
+   if(close == 0) return 0;
+   return atr / close;
+}
+
+// Efficiency Ratio
+double ER(int period=20)
+{
+   double direction = MathAbs(iClose(_Symbol,_Period,1) - iClose(_Symbol,_Period,period));
+   double volatility = 0;
+
+   for(int i=1;i<=period;i++)
+      volatility += MathAbs(iClose(_Symbol,_Period,i) - iClose(_Symbol,_Period,i+1));
+
+   if(volatility == 0) return 0;
+   return direction / volatility;
+}
+
+// KAMA slope (normalizado)
+double KamaSlope()
+{
+   double kama_now = iMA(_Symbol,_Period,10,0,MODE_EMA,PRICE_CLOSE,1);
+   double kama_prev = iMA(_Symbol,_Period,10,0,MODE_EMA,PRICE_CLOSE,2);
+   double close = iClose(_Symbol,_Period,1);
+   if(close == 0) return 0;
+   return (kama_now - kama_prev)/close;
+}
+
+// Volatilidade realizada
+double RealizedVol()
+{
+   double sum = 0;
+   int n = 20;
+
+   for(int i=1;i<=n;i++)
+      sum += MathPow(Ret(i),2);
+
+   return MathSqrt(sum/n);
+}
+
+// Expected Move normalizado
+double ExpectedMove()
+{
+   double vol = RealizedVol();
+   return vol * MathSqrt(1.0/252.0);
+}
+
+// ===== SMC SIMPLIFICADO =====
+
+// sweep topo
+int SweepTop()
+{
+   double high = iHigh(_Symbol,_Period,1);
+   double prev_high = iHigh(_Symbol,_Period,2);
+   double close = iClose(_Symbol,_Period,1);
+
+   if(high > prev_high && close < prev_high)
+      return 1;
+
+   return 0;
+}
+
+// sweep fundo
+int SweepBottom()
+{
+   double low = iLow(_Symbol,_Period,1);
+   double prev_low = iLow(_Symbol,_Period,2);
+   double close = iClose(_Symbol,_Period,1);
+
+   if(low < prev_low && close > prev_low)
+      return 1;
+
+   return 0;
+}
+
+// ===== REGIME =====
+
+double FlowScore()
+{
+   double flow = 0;
+
+   for(int i=1;i<=10;i++)
+      flow += Ret(i);
+
+   return flow;
+}
+
+int Regime()
+{
+   double er = ER();
+   double slope = KamaSlope();
+
+   if(er > 0.45 && slope > 0) return 1;   // bull
+   if(er > 0.45 && slope < 0) return -1;  // bear
+   if(er < 0.25) return 0;                // range
+
+   return 2; // manipulation
+}
+
+// ===== DISTÂNCIA S&D (proxy) =====
+
+double DistMean()
+{
+   double ma = iMA(_Symbol,_Period,20,0,MODE_SMA,PRICE_CLOSE,1);
+   double close = iClose(_Symbol,_Period,1);
+
+   if(close == 0) return 0;
+
+   return (close - ma)/ma;
+}
+
+// ===== REGIME LABEL =====
+string RegimeLabel()
+{
+   int regime = Regime();
+   if(regime == 1) return "TREND_BULL";
+   if(regime == -1) return "TREND_BEAR";
+   if(regime == 0) return "RANGE";
+   return "MANIPULATION";
+}
+
+// ===== EXPORT =====
+void ExportFeatures()
+{
+   int file = FileOpen(filename, FILE_CSV|FILE_WRITE, ',');
+   if(file == INVALID_HANDLE) return;
+
+   // ===== HEADER (1ª vez) =====
+   if(!header_written)
+   {
+      FileWrite(file,
+         "datetime","date","time",
+         "open","high","low","close",
+         "mt5_er_mean",
+         "mt5_kama_slope",
+         "mt5_flow_score",
+         "mt5_regime",
+         "mt5_realized_vol",
+         "mt5_expected_move",
+         "mt5_atr_pct",
+         "mt5_sweep_top",
+         "mt5_sweep_bottom",
+         "mt5_ret_1",
+         "mt5_ret_3",
+         "mt5_dist_mean"
+      );
+      header_written = true;
+   }
+
+   // ===== FEATURES =====
+   datetime ts = iTime(_Symbol,_Period,1);
+   string date_str = TimeToString(ts, TIME_DATE);
+   string time_str = TimeToString(ts, TIME_MINUTES);
+   
+   double o = iOpen(_Symbol,_Period,1);
+   double h = iHigh(_Symbol,_Period,1);
+   double l = iLow(_Symbol,_Period,1);
+   double c = iClose(_Symbol,_Period,1);
+   
+   double ret1 = Ret(1);
+   double ret3 = Ret(3);
+   double atr = ATR_pct();
+   double er = ER();
+   double kama_slope = KamaSlope();
+   double rv = RealizedVol();
+   double em = ExpectedMove();
+   double flow = FlowScore();
+   string regime_label = RegimeLabel();
+   int sweep_up = SweepTop();
+   int sweep_down = SweepBottom();
+   double dist = DistMean();
+
+   // ===== CSV APPEND (1 LINHA) =====
+   FileWrite(file,
+      TimeToString(ts, TIME_DATE|TIME_MINUTES),
+      date_str,
+      time_str,
+      o,h,l,c,
+      er,
+      kama_slope,
+      flow,
+      regime_label,
+      rv,
+      em,
+      atr,
+      sweep_up,
+      sweep_down,
+      ret1,
+      ret3,
+      dist
+   );
+
+   FileClose(file);
+}
+
+void OnTick()
+{
+   datetime current = iTime(_Symbol,_Period,0);
+
+   if(current != last_bar)
+   {
+      last_bar = current;
+
+      // Apenas candle fechado (shift 1)
+      ExportFeatures();
+      Alert("Candle exportado: ", TimeToString(iTime(_Symbol,_Period,1), TIME_DATE|TIME_MINUTES));
+   }
+}
+
+int OnInit()
+{
+   Print("EA iniciado. Exportando para: ", filename);
+   Print("Símbolo: ", _Symbol);
+   Print("Período: ", _Period);
+   return INIT_SUCCEEDED;
+}
+
+void OnDeinit(const int reason)
+{
+   Print("EA finalizado.");
+}

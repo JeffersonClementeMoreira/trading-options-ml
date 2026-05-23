@@ -1,0 +1,3749 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset='utf-8'>
+<title>Backtest Colorido</title>
+<style>
+table { border-collapse: collapse; font-family: Arial, sans-serif; font-size: 12px; }
+th { background-color: #333; color: white; padding: 8px; text-align: left; border: 1px solid #ddd; }
+td { padding: 6px; border: 1px solid #ddd; }
+tr:nth-child(even) { background-color: #f9f9f9; }
+.green { background-color: #90EE90; }
+.red { background-color: #FFB6C6; }
+</style>
+</head>
+<body>
+<h2>Backtest - Coloração de Strikes</h2>
+<p>Verde: PUT > close (OTM bom) | CALL &lt; close (OTM bom)</p>
+<p>Vermelho: PUT ≤ close (ITM ruim) | CALL ≥ close (ITM ruim)</p>
+<p>Colunas booleanas de performance: Verde=True | Vermelho=False</p>
+<table>
+<tr>
+<th>analysis_timestamp</th>
+<th>target_date</th>
+<th>expiry_days</th>
+<th>expiry_close_timestamp</th>
+<th>strategy_mode</th>
+<th>regime</th>
+<th>analysis_price</th>
+<th>expected_move</th>
+<th>expected_lower</th>
+<th>expected_upper</th>
+<th>expected_put_strike</th>
+<th>expected_call_strike</th>
+<th>put_1</th>
+<th>put_2</th>
+<th>put_3</th>
+<th>call_1</th>
+<th>call_2</th>
+<th>call_3</th>
+<th>next_day_close</th>
+<th>realized_move</th>
+<th>expected_move_respected</th>
+<th>close_within_expected_band</th>
+<th>close_within_strikes</th>
+<th>close_within_pair_1</th>
+<th>close_within_pair_2</th>
+<th>close_within_pair_3</th>
+<th>close_within_any_pair</th>
+<th>chance_call_only_pct</th>
+<th>chance_put_only_pct</th>
+<th>chance_strangle_pct</th>
+<th>success_call_only</th>
+<th>success_put_only</th>
+<th>success_strangle</th>
+<th>call_otm_at_close</th>
+<th>put_otm_at_close</th>
+<th>next_top_sweep</th>
+<th>next_bottom_sweep</th>
+<th>hit_next_top_sweep</th>
+<th>hit_next_bottom_sweep</th>
+<th>flow_score</th>
+<th>er_mean</th>
+<th>kama_slope</th>
+<th>satisfactory</th>
+<th>satisfactory_rule</th>
+</tr>
+<tr>
+<td >2026-01-05 19:00:00</td>
+<td >2026-01-06</td>
+<td >1</td>
+<td >2026-01-06 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >4439.8900</td>
+<td >67.7303</td>
+<td >4372.1597</td>
+<td >4507.6203</td>
+<td >4266.4900</td>
+<td >4555.4900</td>
+<td class='green'>4382.0900</td>
+<td class='green'>4324.2900</td>
+<td class='green'>4266.4900</td>
+<td class='green'>4497.6900</td>
+<td class='green'>4555.4900</td>
+<td class='green'>4613.2900</td>
+<td >4471.6500</td>
+<td >31.7600</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >95.4000</td>
+<td >99.5500</td>
+<td >94.9500</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4455.6800</td>
+<td >4437.5300</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >-0.1793</td>
+<td >0.2864</td>
+<td >1.9746</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-01-06 19:00:00</td>
+<td >2026-01-07</td>
+<td >1</td>
+<td >2026-01-07 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >4481.9900</td>
+<td >47.9111</td>
+<td >4434.0789</td>
+<td >4529.9011</td>
+<td >4349.8713</td>
+<td >4570.0691</td>
+<td class='green'>4437.9504</td>
+<td class='green'>4393.9109</td>
+<td class='green'>4349.8713</td>
+<td class='green'>4526.0296</td>
+<td class='green'>4570.0691</td>
+<td class='green'>4614.1087</td>
+<td >4447.1400</td>
+<td >34.8500</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >96.5700</td>
+<td >99.7400</td>
+<td >96.3100</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4490.8800</td>
+<td >4462.9200</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >-0.2010</td>
+<td >0.2872</td>
+<td >7.9522</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-01-07 19:00:00</td>
+<td >2026-01-08</td>
+<td >1</td>
+<td >2026-01-08 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >4449.3600</td>
+<td >33.0899</td>
+<td >4416.2701</td>
+<td >4482.4499</td>
+<td >4371.1807</td>
+<td >4566.6289</td>
+<td class='green'>4410.2704</td>
+<td class='green'>4371.1807</td>
+<td class='green'>4332.0911</td>
+<td class='green'>4488.4496</td>
+<td class='green'>4527.5393</td>
+<td class='green'>4566.6289</td>
+<td >4423.1000</td>
+<td >26.2600</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.9800</td>
+<td >99.1400</td>
+<td >99.1200</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4455.6800</td>
+<td >4447.1000</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >-0.1908</td>
+<td >0.0851</td>
+<td >3.1151</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-01-08 19:00:00</td>
+<td >2026-01-09</td>
+<td >1</td>
+<td >2026-01-09 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >4447.1600</td>
+<td >49.2734</td>
+<td >4397.8866</td>
+<td >4496.4334</td>
+<td >4362.3126</td>
+<td >4532.0074</td>
+<td class='green'>4418.8775</td>
+<td class='green'>4390.5951</td>
+<td class='green'>4362.3126</td>
+<td class='red'>4475.4425</td>
+<td class='green'>4503.7249</td>
+<td class='green'>4532.0074</td>
+<td >4489.2100</td>
+<td >42.0500</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >95.6000</td>
+<td >95.8900</td>
+<td >91.4900</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4455.6800</td>
+<td >4446.7800</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td >-0.2991</td>
+<td >0.3250</td>
+<td >9.3579</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-01-12 19:00:00</td>
+<td >2026-01-13</td>
+<td >1</td>
+<td >2026-01-13 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >4613.6400</td>
+<td >42.4178</td>
+<td >4571.2222</td>
+<td >4656.0578</td>
+<td >4495.9386</td>
+<td >4731.3414</td>
+<td class='green'>4574.4062</td>
+<td class='green'>4535.1724</td>
+<td class='green'>4495.9386</td>
+<td class='green'>4652.8738</td>
+<td class='green'>4692.1076</td>
+<td class='green'>4731.3414</td>
+<td >4618.5100</td>
+<td >4.8700</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.6900</td>
+<td >99.7500</td>
+<td >99.4500</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4620.0500</td>
+<td >4600.1700</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >0.1174</td>
+<td >0.1315</td>
+<td >3.3837</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-01-13 19:00:00</td>
+<td >2026-01-14</td>
+<td >1</td>
+<td >2026-01-14 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >4595.5300</td>
+<td >36.7767</td>
+<td >4558.7533</td>
+<td >4632.3067</td>
+<td >4468.4368</td>
+<td >4722.6232</td>
+<td class='green'>4553.1656</td>
+<td class='green'>4510.8012</td>
+<td class='green'>4468.4368</td>
+<td class='green'>4637.8944</td>
+<td class='green'>4680.2588</td>
+<td class='green'>4722.6232</td>
+<td >4634.0500</td>
+<td >38.5200</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.9700</td>
+<td >99.9800</td>
+<td >99.9400</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4601.0000</td>
+<td >4580.8500</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td >-0.1675</td>
+<td >0.1291</td>
+<td >-5.6107</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-01-14 19:00:00</td>
+<td >2026-01-15</td>
+<td >1</td>
+<td >2026-01-15 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >4636.8600</td>
+<td >50.0190</td>
+<td >4586.8410</td>
+<td >4686.8790</td>
+<td >4511.0945</td>
+<td >4720.7036</td>
+<td class='green'>4594.9382</td>
+<td class='green'>4553.0164</td>
+<td class='green'>4511.0945</td>
+<td class='green'>4678.7818</td>
+<td class='green'>4720.7036</td>
+<td class='green'>4762.6255</td>
+<td >4599.7100</td>
+<td >37.1500</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >95.1700</td>
+<td >99.4600</td>
+<td >94.6300</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4639.4800</td>
+<td >4601.0100</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td >0.5633</td>
+<td >0.1712</td>
+<td >1.4415</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-01-15 19:00:00</td>
+<td >2026-01-16</td>
+<td >1</td>
+<td >2026-01-16 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >4618.9100</td>
+<td >31.1478</td>
+<td >4587.7622</td>
+<td >4650.0578</td>
+<td >4492.8110</td>
+<td >4702.9760</td>
+<td class='green'>4576.8770</td>
+<td class='green'>4534.8440</td>
+<td class='green'>4492.8110</td>
+<td class='green'>4660.9430</td>
+<td class='green'>4702.9760</td>
+<td class='green'>4745.0090</td>
+<td >4606.8000</td>
+<td >12.1100</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.6300</td>
+<td >100.0000</td>
+<td >99.6200</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4620.0500</td>
+<td >4601.0900</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td >0.1650</td>
+<td >0.1498</td>
+<td >2.7102</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-01-19 19:00:00</td>
+<td >2026-01-20</td>
+<td >1</td>
+<td >2026-01-20 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >4671.6900</td>
+<td >46.8896</td>
+<td >4624.8004</td>
+<td >4718.5796</td>
+<td >4544.9798</td>
+<td >4798.4002</td>
+<td class='green'>4629.4533</td>
+<td class='green'>4587.2166</td>
+<td class='green'>4544.9798</td>
+<td class='red'>4713.9267</td>
+<td class='green'>4756.1634</td>
+<td class='green'>4798.4002</td>
+<td >4740.5600</td>
+<td >68.8700</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.6200</td>
+<td >99.6900</td>
+<td >99.3100</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4690.5300</td>
+<td >4659.2900</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td >-0.1417</td>
+<td >0.1732</td>
+<td >3.3601</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-01-20 19:00:00</td>
+<td >2026-01-21</td>
+<td >1</td>
+<td >2026-01-21 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >4758.7600</td>
+<td >48.0292</td>
+<td >4710.7308</td>
+<td >4806.7892</td>
+<td >4642.2662</td>
+<td >4797.5913</td>
+<td class='green'>4719.9287</td>
+<td class='green'>4681.0975</td>
+<td class='green'>4642.2662</td>
+<td class='red'>4797.5913</td>
+<td class='red'>4836.4225</td>
+<td class='green'>4875.2538</td>
+<td >4844.3700</td>
+<td >85.6100</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >78.9700</td>
+<td >99.3000</td>
+<td >78.2600</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td >nan</td>
+<td >4722.0400</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td >0.1242</td>
+<td >0.2583</td>
+<td >27.3059</td>
+<td class='red'>Não</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-01-21 19:00:00</td>
+<td >2026-01-22</td>
+<td >1</td>
+<td >2026-01-22 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >4848.6000</td>
+<td >91.5697</td>
+<td >4757.0303</td>
+<td >4940.1697</td>
+<td >4723.9298</td>
+<td >4973.2702</td>
+<td class='green'>4807.0433</td>
+<td class='green'>4765.4865</td>
+<td class='green'>4723.9298</td>
+<td class='green'>4890.1567</td>
+<td class='green'>4931.7135</td>
+<td class='green'>4973.2702</td>
+<td >4823.7800</td>
+<td >24.8200</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >91.0600</td>
+<td >91.6100</td>
+<td >82.6700</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4849.3500</td>
+<td >4802.0900</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >0.5823</td>
+<td >0.2069</td>
+<td >-16.5778</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-01-22 19:00:00</td>
+<td >2026-01-23</td>
+<td >1</td>
+<td >2026-01-23 14:00:00</td>
+<td >strangle</td>
+<td >TREND_BULL</td>
+<td >4923.5800</td>
+<td >89.5045</td>
+<td >4834.0755</td>
+<td >5013.0845</td>
+<td >4790.9123</td>
+<td >4967.8026</td>
+<td class='green'>4879.3574</td>
+<td class='green'>4835.1349</td>
+<td class='green'>4790.9123</td>
+<td class='green'>4967.8026</td>
+<td class='green'>5012.0251</td>
+<td class='green'>5056.2477</td>
+<td >4944.1600</td>
+<td >20.5800</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >68.8600</td>
+<td >93.3500</td>
+<td >62.2100</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >nan</td>
+<td >4826.8400</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td >0.9525</td>
+<td >0.5779</td>
+<td >53.9064</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-01-26 19:00:00</td>
+<td >2026-01-27</td>
+<td >1</td>
+<td >2026-01-27 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >5060.0000</td>
+<td >89.9955</td>
+<td >4970.0045</td>
+<td >5149.9955</td>
+<td >4920.9603</td>
+<td >5199.0397</td>
+<td class='green'>5013.6534</td>
+<td class='green'>4967.3068</td>
+<td class='green'>4920.9603</td>
+<td class='green'>5106.3466</td>
+<td class='green'>5152.6932</td>
+<td class='green'>5199.0397</td>
+<td >5059.7100</td>
+<td >0.2900</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >93.6300</td>
+<td >94.1400</td>
+<td >87.7700</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >5085.3000</td>
+<td >5035.6900</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >-0.8059</td>
+<td >0.0511</td>
+<td >-0.7188</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-01-27 19:00:00</td>
+<td >2026-01-28</td>
+<td >1</td>
+<td >2026-01-28 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >5086.7100</td>
+<td >63.3239</td>
+<td >5023.3861</td>
+<td >5150.0339</td>
+<td >4946.0328</td>
+<td >5227.3872</td>
+<td class='green'>5039.8176</td>
+<td class='green'>4992.9252</td>
+<td class='green'>4946.0328</td>
+<td class='red'>5133.6024</td>
+<td class='red'>5180.4948</td>
+<td class='red'>5227.3872</td>
+<td >5262.1800</td>
+<td >175.4700</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td >98.5800</td>
+<td >98.7900</td>
+<td >97.3700</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td >5092.7700</td>
+<td >5075.7900</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td >0.0581</td>
+<td >0.0739</td>
+<td >2.8667</td>
+<td class='red'>Não</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-01-28 19:00:00</td>
+<td >2026-01-29</td>
+<td >1</td>
+<td >2026-01-29 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >5297.1200</td>
+<td >64.0278</td>
+<td >5233.0922</td>
+<td >5361.1478</td>
+<td >5149.1322</td>
+<td >5445.1078</td>
+<td class='green'>5247.7907</td>
+<td class='green'>5198.4615</td>
+<td class='green'>5149.1322</td>
+<td class='red'>5346.4493</td>
+<td class='red'>5395.7785</td>
+<td class='red'>5445.1078</td>
+<td >5528.5700</td>
+<td >231.4500</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td >98.8700</td>
+<td >99.0500</td>
+<td >97.9200</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td >5311.2100</td>
+<td >5268.3400</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >0.3239</td>
+<td >0.1384</td>
+<td >8.7987</td>
+<td class='red'>Não</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-01-29 19:00:00</td>
+<td >2026-01-30</td>
+<td >1</td>
+<td >2026-01-30 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >5306.3600</td>
+<td >329.4676</td>
+<td >4976.8924</td>
+<td >5635.8276</td>
+<td >5156.6199</td>
+<td >5456.1001</td>
+<td class='red'>5256.4466</td>
+<td class='red'>5206.5333</td>
+<td class='red'>5156.6199</td>
+<td class='green'>5356.2734</td>
+<td class='green'>5406.1867</td>
+<td class='green'>5456.1001</td>
+<td >5052.7700</td>
+<td >253.5900</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td >67.3000</td>
+<td >67.7600</td>
+<td >35.0600</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td >5597.7100</td>
+<td >5104.9800</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td >-1.0033</td>
+<td >0.2422</td>
+<td >24.3343</td>
+<td class='red'>Não</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-02-02 19:00:00</td>
+<td >2026-02-03</td>
+<td >1</td>
+<td >2026-02-03 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >4646.9500</td>
+<td >378.6377</td>
+<td >4268.3123</td>
+<td >5025.5877</td>
+<td >4511.5848</td>
+<td >4782.3152</td>
+<td class='green'>4601.8283</td>
+<td class='green'>4556.7065</td>
+<td class='green'>4511.5848</td>
+<td class='red'>4692.0717</td>
+<td class='red'>4737.1935</td>
+<td class='red'>4782.3152</td>
+<td >4923.4500</td>
+<td >276.5000</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td >63.7700</td>
+<td >64.1600</td>
+<td >27.9400</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td >4690.5300</td>
+<td >4618.2000</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td >-0.5846</td>
+<td >0.1821</td>
+<td >-10.2470</td>
+<td class='red'>Não</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-02-03 19:00:00</td>
+<td >2026-02-04</td>
+<td >1</td>
+<td >2026-02-04 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >4915.7300</td>
+<td >118.9827</td>
+<td >4796.7473</td>
+<td >5034.7127</td>
+<td >4770.8257</td>
+<td >5060.6343</td>
+<td class='green'>4867.4286</td>
+<td class='green'>4819.1271</td>
+<td class='green'>4770.8257</td>
+<td class='red'>4964.0314</td>
+<td class='red'>5012.3329</td>
+<td class='green'>5060.6343</td>
+<td >5047.4500</td>
+<td >131.7200</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >88.5000</td>
+<td >89.1800</td>
+<td >77.6800</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4959.7000</td>
+<td >4884.8000</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >-0.3420</td>
+<td >0.1069</td>
+<td >-5.1556</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-02-04 19:00:00</td>
+<td >2026-02-05</td>
+<td >1</td>
+<td >2026-02-05 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >4946.6100</td>
+<td >143.9353</td>
+<td >4802.6747</td>
+<td >5090.5453</td>
+<td >4799.0751</td>
+<td >5094.1449</td>
+<td class='red'>4897.4317</td>
+<td class='red'>4848.2534</td>
+<td class='green'>4799.0751</td>
+<td class='green'>4995.7883</td>
+<td class='green'>5044.9666</td>
+<td class='green'>5094.1449</td>
+<td >4814.0700</td>
+<td >132.5400</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >84.3800</td>
+<td >85.1000</td>
+<td >69.4700</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4959.7000</td>
+<td >4872.6400</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >1.0235</td>
+<td >0.4317</td>
+<td >-16.1240</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-02-05 19:00:00</td>
+<td >2026-02-06</td>
+<td >1</td>
+<td >2026-02-06 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >4850.8700</td>
+<td >198.5485</td>
+<td >4652.3215</td>
+<td >5049.4185</td>
+<td >4704.5036</td>
+<td >4997.2364</td>
+<td class='green'>4802.0812</td>
+<td class='green'>4753.2924</td>
+<td class='green'>4704.5036</td>
+<td class='red'>4899.6588</td>
+<td class='green'>4948.4476</td>
+<td class='green'>4997.2364</td>
+<td >4921.6800</td>
+<td >70.8100</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >76.6200</td>
+<td >77.2900</td>
+<td >53.9100</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4888.0000</td>
+<td >4812.3000</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >-0.5062</td>
+<td >0.0990</td>
+<td >2.2170</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-02-09 19:00:00</td>
+<td >2026-02-10</td>
+<td >1</td>
+<td >2026-02-10 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >5065.9600</td>
+<td >98.2643</td>
+<td >4967.6957</td>
+<td >5164.2243</td>
+<td >4912.4261</td>
+<td >5219.4939</td>
+<td class='green'>5014.7820</td>
+<td class='green'>4963.6040</td>
+<td class='green'>4912.4261</td>
+<td class='green'>5117.1380</td>
+<td class='green'>5168.3160</td>
+<td class='green'>5219.4939</td>
+<td >5055.6000</td>
+<td >10.3600</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >93.8100</td>
+<td >94.3700</td>
+<td >88.1800</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >5085.3000</td>
+<td >5040.6200</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td >0.3170</td>
+<td >0.3235</td>
+<td >3.9255</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-02-10 19:00:00</td>
+<td >2026-02-11</td>
+<td >1</td>
+<td >2026-02-11 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >5012.2100</td>
+<td >56.0379</td>
+<td >4956.1721</td>
+<td >5068.2479</td>
+<td >4860.0816</td>
+<td >5164.3384</td>
+<td class='green'>4961.5005</td>
+<td class='green'>4910.7911</td>
+<td class='green'>4860.0816</td>
+<td class='red'>5062.9195</td>
+<td class='green'>5113.6289</td>
+<td class='green'>5164.3384</td>
+<td >5073.6100</td>
+<td >61.4000</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.6300</td>
+<td >99.7100</td>
+<td >99.3300</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >5030.8200</td>
+<td >5004.3800</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td >-0.2875</td>
+<td >0.1490</td>
+<td >-4.2474</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-02-11 19:00:00</td>
+<td >2026-02-12</td>
+<td >1</td>
+<td >2026-02-12 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >5088.6700</td>
+<td >54.2970</td>
+<td >5034.3730</td>
+<td >5142.9670</td>
+<td >4930.0452</td>
+<td >5247.2948</td>
+<td class='green'>5035.7951</td>
+<td class='green'>4982.9201</td>
+<td class='green'>4930.0452</td>
+<td class='green'>5141.5449</td>
+<td class='green'>5194.4199</td>
+<td class='green'>5247.2948</td>
+<td >5064.8400</td>
+<td >23.8300</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.8000</td>
+<td >99.8500</td>
+<td >99.6500</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >5092.7700</td>
+<td >5066.4600</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td >0.3722</td>
+<td >0.0929</td>
+<td >6.3625</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-02-12 19:00:00</td>
+<td >2026-02-13</td>
+<td >1</td>
+<td >2026-02-13 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >4932.9300</td>
+<td >152.6107</td>
+<td >4780.3193</td>
+<td >5085.5407</td>
+<td >4775.1120</td>
+<td >5090.7480</td>
+<td class='green'>4880.3240</td>
+<td class='green'>4827.7180</td>
+<td class='green'>4775.1120</td>
+<td class='red'>4985.5360</td>
+<td class='green'>5038.1420</td>
+<td class='green'>5090.7480</td>
+<td >4998.0700</td>
+<td >65.1400</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >84.5600</td>
+<td >85.3400</td>
+<td >69.9000</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4967.1700</td>
+<td >4906.3500</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td >-0.6621</td>
+<td >0.3395</td>
+<td >-28.8943</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-02-16 19:00:00</td>
+<td >2026-02-17</td>
+<td >1</td>
+<td >2026-02-17 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >4990.7600</td>
+<td >32.3835</td>
+<td >4958.3765</td>
+<td >5023.1435</td>
+<td >4834.8536</td>
+<td >5146.6664</td>
+<td class='red'>4938.7912</td>
+<td class='green'>4886.8224</td>
+<td class='green'>4834.8536</td>
+<td class='green'>5042.7288</td>
+<td class='green'>5094.6976</td>
+<td class='green'>5146.6664</td>
+<td >4896.1500</td>
+<td >94.6100</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >100.0000</td>
+<td >100.0000</td>
+<td >100.0000</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >5030.8200</td>
+<td >4968.6000</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td >-0.0632</td>
+<td >0.0986</td>
+<td >6.0137</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-02-17 19:00:00</td>
+<td >2026-02-18</td>
+<td >1</td>
+<td >2026-02-18 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >4893.4100</td>
+<td >105.5376</td>
+<td >4787.8724</td>
+<td >4998.9476</td>
+<td >4744.6693</td>
+<td >5042.1507</td>
+<td class='green'>4843.8298</td>
+<td class='green'>4794.2495</td>
+<td class='green'>4744.6693</td>
+<td class='red'>4942.9902</td>
+<td class='green'>4992.5705</td>
+<td class='green'>5042.1507</td>
+<td >4958.1300</td>
+<td >64.7200</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >91.7500</td>
+<td >92.3800</td>
+<td >84.1300</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4923.9600</td>
+<td >4849.7700</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td >0.5588</td>
+<td >0.2496</td>
+<td >-1.8015</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-02-18 19:00:00</td>
+<td >2026-02-19</td>
+<td >1</td>
+<td >2026-02-19 14:00:00</td>
+<td >strangle</td>
+<td >TREND_BEAR</td>
+<td >4991.5500</td>
+<td >54.5844</td>
+<td >4936.9656</td>
+<td >5046.1344</td>
+<td >4839.7149</td>
+<td >5143.3851</td>
+<td class='green'>4940.9383</td>
+<td class='green'>4890.3266</td>
+<td class='green'>4839.7149</td>
+<td class='green'>5042.1617</td>
+<td class='green'>5092.7734</td>
+<td class='green'>5143.3851</td>
+<td >4972.4300</td>
+<td >19.1200</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.6900</td>
+<td >99.7600</td>
+<td >99.4600</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >5030.8200</td>
+<td >4980.3300</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td >0.0024</td>
+<td >0.5002</td>
+<td >-2.8648</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-02-19 19:00:00</td>
+<td >2026-02-20</td>
+<td >1</td>
+<td >2026-02-20 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >4986.5700</td>
+<td >38.3956</td>
+<td >4948.1744</td>
+<td >5024.9656</td>
+<td >4835.2198</td>
+<td >5137.9202</td>
+<td class='green'>4936.1199</td>
+<td class='green'>4885.6699</td>
+<td class='green'>4835.2198</td>
+<td class='red'>5037.0201</td>
+<td class='green'>5087.4701</td>
+<td class='green'>5137.9202</td>
+<td >5042.6000</td>
+<td >56.0300</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.9900</td>
+<td >100.0000</td>
+<td >99.9900</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4988.0000</td>
+<td >4974.9400</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td >0.0143</td>
+<td >0.0581</td>
+<td >-9.6400</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-02-23 19:00:00</td>
+<td >2026-02-24</td>
+<td >1</td>
+<td >2026-02-24 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >5210.9800</td>
+<td >86.0442</td>
+<td >5124.9358</td>
+<td >5297.0242</td>
+<td >5054.0169</td>
+<td >5367.9431</td>
+<td class='red'>5158.6590</td>
+<td class='red'>5106.3380</td>
+<td class='green'>5054.0169</td>
+<td class='green'>5263.3010</td>
+<td class='green'>5315.6220</td>
+<td class='green'>5367.9431</td>
+<td >5104.5900</td>
+<td >106.3900</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >96.3900</td>
+<td >96.8000</td>
+<td >93.1900</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >5224.9100</td>
+<td >5190.6400</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >0.1909</td>
+<td >0.4031</td>
+<td >4.3640</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-02-24 19:00:00</td>
+<td >2026-02-25</td>
+<td >1</td>
+<td >2026-02-25 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >5155.9500</td>
+<td >50.4412</td>
+<td >5105.5088</td>
+<td >5206.3912</td>
+<td >5000.3783</td>
+<td >5311.5217</td>
+<td class='green'>5104.0928</td>
+<td class='green'>5052.2355</td>
+<td class='green'>5000.3783</td>
+<td class='green'>5207.8072</td>
+<td class='green'>5259.6645</td>
+<td class='green'>5311.5217</td>
+<td >5185.0300</td>
+<td >29.0800</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.8800</td>
+<td >99.9100</td>
+<td >99.7900</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >5188.0900</td>
+<td >5134.7700</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td >-0.0395</td>
+<td >0.1387</td>
+<td >14.8256</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-02-25 19:00:00</td>
+<td >2026-02-26</td>
+<td >1</td>
+<td >2026-02-26 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >5207.1600</td>
+<td >63.6227</td>
+<td >5143.5373</td>
+<td >5270.7827</td>
+<td >5049.8110</td>
+<td >5364.5090</td>
+<td class='green'>5154.7103</td>
+<td class='green'>5102.2607</td>
+<td class='green'>5049.8110</td>
+<td class='green'>5259.6097</td>
+<td class='green'>5312.0593</td>
+<td class='green'>5364.5090</td>
+<td >5165.9400</td>
+<td >41.2200</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.2600</td>
+<td >99.4000</td>
+<td >98.6600</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >5224.9100</td>
+<td >5191.2700</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td >0.0968</td>
+<td >0.2516</td>
+<td >13.6048</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-02-26 19:00:00</td>
+<td >2026-02-27</td>
+<td >1</td>
+<td >2026-02-27 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >5186.1100</td>
+<td >45.9742</td>
+<td >5140.1358</td>
+<td >5232.0842</td>
+<td >5029.1659</td>
+<td >5343.0541</td>
+<td class='green'>5133.7953</td>
+<td class='green'>5081.4806</td>
+<td class='green'>5029.1659</td>
+<td class='green'>5238.4247</td>
+<td class='green'>5290.7394</td>
+<td class='green'>5343.0541</td>
+<td >5226.2100</td>
+<td >40.1000</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.9600</td>
+<td >99.9700</td>
+<td >99.9400</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >5188.0900</td>
+<td >5161.6100</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td >0.3716</td>
+<td >0.0847</td>
+<td >1.3332</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-03-02 19:00:00</td>
+<td >2026-03-03</td>
+<td >1</td>
+<td >2026-03-03 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >5330.2500</td>
+<td >130.1588</td>
+<td >5200.0912</td>
+<td >5460.4088</td>
+<td >5170.2448</td>
+<td >5490.2552</td>
+<td class='red'>5276.9149</td>
+<td class='red'>5223.5799</td>
+<td class='red'>5170.2448</td>
+<td class='green'>5383.5851</td>
+<td class='green'>5436.9201</td>
+<td class='green'>5490.2552</td>
+<td >5164.6800</td>
+<td >165.5700</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td >88.7100</td>
+<td >89.4000</td>
+<td >78.1100</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td >5597.7100</td>
+<td >5289.2400</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td >0.8987</td>
+<td >0.3884</td>
+<td >-13.8504</td>
+<td class='red'>Não</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-03-03 19:00:00</td>
+<td >2026-03-04</td>
+<td >1</td>
+<td >2026-03-04 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >5111.9800</td>
+<td >117.2724</td>
+<td >4994.7076</td>
+<td >5229.2524</td>
+<td >4958.2629</td>
+<td >5265.6971</td>
+<td class='green'>5060.7410</td>
+<td class='green'>5009.5020</td>
+<td class='green'>4958.2629</td>
+<td class='red'>5163.2190</td>
+<td class='green'>5214.4580</td>
+<td class='green'>5265.6971</td>
+<td >5164.8800</td>
+<td >52.9000</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >90.1700</td>
+<td >90.8400</td>
+<td >81.0100</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >5189.9800</td>
+<td >5064.9100</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td >0.0684</td>
+<td >0.2209</td>
+<td >0.7648</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-03-04 19:00:00</td>
+<td >2026-03-05</td>
+<td >1</td>
+<td >2026-03-05 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >5130.9400</td>
+<td >106.6696</td>
+<td >5024.2704</td>
+<td >5237.6096</td>
+<td >4976.3879</td>
+<td >5285.4921</td>
+<td class='green'>5079.4226</td>
+<td class='green'>5027.9053</td>
+<td class='green'>4976.3879</td>
+<td class='green'>5182.4574</td>
+<td class='green'>5233.9747</td>
+<td class='green'>5285.4921</td>
+<td >5112.5800</td>
+<td >18.3600</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >92.3300</td>
+<td >92.9400</td>
+<td >85.2700</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >5188.0900</td>
+<td >5111.2300</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >-0.1278</td>
+<td >0.2827</td>
+<td >-15.8653</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-03-05 19:00:00</td>
+<td >2026-03-06</td>
+<td >1</td>
+<td >2026-03-06 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >5073.1400</td>
+<td >93.9749</td>
+<td >4979.1651</td>
+<td >5167.1149</td>
+<td >4920.0670</td>
+<td >5226.2130</td>
+<td class='green'>5022.1157</td>
+<td class='green'>4971.0913</td>
+<td class='green'>4920.0670</td>
+<td class='green'>5124.1643</td>
+<td class='green'>5175.1887</td>
+<td class='green'>5226.2130</td>
+<td >5096.7600</td>
+<td >23.6200</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >94.5700</td>
+<td >95.0900</td>
+<td >89.6700</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >5085.3000</td>
+<td >5050.8000</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td >-0.0542</td>
+<td >0.3279</td>
+<td >-6.3375</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-03-09 19:00:00</td>
+<td >2026-03-10</td>
+<td >1</td>
+<td >2026-03-10 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >5122.7200</td>
+<td >114.0690</td>
+<td >5008.6510</td>
+<td >5236.7890</td>
+<td >4967.4658</td>
+<td >5277.9742</td>
+<td class='green'>5070.9686</td>
+<td class='green'>5019.2172</td>
+<td class='green'>4967.4658</td>
+<td class='red'>5174.4714</td>
+<td class='green'>5226.2228</td>
+<td class='green'>5277.9742</td>
+<td >5195.1800</td>
+<td >72.4600</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >91.0000</td>
+<td >91.6500</td>
+<td >82.6500</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >5188.0900</td>
+<td >5089.0100</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td >0.6254</td>
+<td >0.1511</td>
+<td >4.5604</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-03-10 19:00:00</td>
+<td >2026-03-11</td>
+<td >1</td>
+<td >2026-03-11 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >5198.0500</td>
+<td >46.1919</td>
+<td >5151.8581</td>
+<td >5244.2419</td>
+<td >5040.2811</td>
+<td >5355.8189</td>
+<td class='green'>5145.4604</td>
+<td class='green'>5092.8707</td>
+<td class='green'>5040.2811</td>
+<td class='green'>5250.6396</td>
+<td class='green'>5303.2293</td>
+<td class='green'>5355.8189</td>
+<td >5189.7900</td>
+<td >8.2600</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.9600</td>
+<td >99.9700</td>
+<td >99.9400</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >5202.3800</td>
+<td >5184.1300</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >-0.4892</td>
+<td >0.2163</td>
+<td >-2.9105</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-03-11 19:00:00</td>
+<td >2026-03-12</td>
+<td >1</td>
+<td >2026-03-12 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >5172.2200</td>
+<td >40.2589</td>
+<td >5131.9611</td>
+<td >5212.4789</td>
+<td >5015.1198</td>
+<td >5329.3202</td>
+<td class='green'>5119.8533</td>
+<td class='green'>5067.4865</td>
+<td class='green'>5015.1198</td>
+<td class='green'>5224.5867</td>
+<td class='green'>5276.9535</td>
+<td class='green'>5329.3202</td>
+<td >5160.9100</td>
+<td >11.3100</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.9900</td>
+<td >100.0000</td>
+<td >99.9900</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >5188.0900</td>
+<td >5154.5700</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >-0.0383</td>
+<td >0.0859</td>
+<td >-3.4658</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-03-12 19:00:00</td>
+<td >2026-03-13</td>
+<td >1</td>
+<td >2026-03-13 14:00:00</td>
+<td >strangle</td>
+<td >TREND_BEAR</td>
+<td >5084.7800</td>
+<td >57.1539</td>
+<td >5027.6261</td>
+<td >5141.9339</td>
+<td >4930.2223</td>
+<td >5239.3377</td>
+<td class='green'>5033.2608</td>
+<td class='green'>4981.7416</td>
+<td class='green'>4930.2223</td>
+<td class='green'>5136.2992</td>
+<td class='green'>5187.8184</td>
+<td class='green'>5239.3377</td>
+<td >5090.7900</td>
+<td >6.0100</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.6100</td>
+<td >99.7000</td>
+<td >99.3100</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >5085.3000</td>
+<td >5079.4400</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >-0.9336</td>
+<td >0.5219</td>
+<td >-42.7825</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-03-16 19:00:00</td>
+<td >2026-03-17</td>
+<td >1</td>
+<td >2026-03-17 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >5011.6800</td>
+<td >57.5234</td>
+<td >4954.1566</td>
+<td >5069.2034</td>
+<td >4855.1201</td>
+<td >5168.2399</td>
+<td class='green'>4959.4934</td>
+<td class='green'>4907.3067</td>
+<td class='green'>4855.1201</td>
+<td class='green'>5063.8666</td>
+<td class='green'>5116.0533</td>
+<td class='green'>5168.2399</td>
+<td >5018.0200</td>
+<td >6.3400</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.6300</td>
+<td >99.7200</td>
+<td >99.3500</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >5030.8200</td>
+<td >4983.8100</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >0.3609</td>
+<td >0.1339</td>
+<td >3.9947</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-03-17 19:00:00</td>
+<td >2026-03-18</td>
+<td >1</td>
+<td >2026-03-18 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >5001.5000</td>
+<td >33.2360</td>
+<td >4968.2640</td>
+<td >5034.7360</td>
+<td >4849.4737</td>
+<td >5153.5263</td>
+<td class='red'>4950.8246</td>
+<td class='red'>4900.1492</td>
+<td class='green'>4849.4737</td>
+<td class='green'>5052.1754</td>
+<td class='green'>5102.8508</td>
+<td class='green'>5153.5263</td>
+<td >4880.8900</td>
+<td >120.6100</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >100.0000</td>
+<td >100.0000</td>
+<td >100.0000</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >5030.8200</td>
+<td >4973.5100</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td >-0.0566</td>
+<td >0.1139</td>
+<td >-0.7552</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-03-18 19:00:00</td>
+<td >2026-03-19</td>
+<td >1</td>
+<td >2026-03-19 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >4856.9000</td>
+<td >71.7233</td>
+<td >4785.1767</td>
+<td >4928.6233</td>
+<td >4709.7020</td>
+<td >5004.0980</td>
+<td class='red'>4807.8340</td>
+<td class='red'>4758.7680</td>
+<td class='red'>4709.7020</td>
+<td class='green'>4905.9660</td>
+<td class='green'>4955.0320</td>
+<td class='green'>5004.0980</td>
+<td >4630.7200</td>
+<td >226.1800</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td >97.8400</td>
+<td >98.1400</td>
+<td >95.9800</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td >4888.0000</td>
+<td >4843.4100</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td >-0.8688</td>
+<td >0.1598</td>
+<td >3.5020</td>
+<td class='red'>Não</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-03-19 19:00:00</td>
+<td >2026-03-20</td>
+<td >1</td>
+<td >2026-03-20 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >4656.9100</td>
+<td >170.5892</td>
+<td >4486.3208</td>
+<td >4827.4992</td>
+<td >4515.5655</td>
+<td >4798.2545</td>
+<td class='red'>4609.7952</td>
+<td class='green'>4562.6803</td>
+<td class='green'>4515.5655</td>
+<td class='green'>4704.0248</td>
+<td class='green'>4751.1397</td>
+<td class='green'>4798.2545</td>
+<td >4587.1700</td>
+<td >69.7400</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >79.2800</td>
+<td >79.9900</td>
+<td >59.2800</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4690.5300</td>
+<td >4595.9700</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >2.0819</td>
+<td >0.0956</td>
+<td >18.0151</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-03-23 19:00:00</td>
+<td >2026-03-24</td>
+<td >1</td>
+<td >2026-03-24 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >4406.6500</td>
+<td >357.0884</td>
+<td >4049.5616</td>
+<td >4763.7384</td>
+<td >4272.6067</td>
+<td >4540.6933</td>
+<td class='green'>4361.9689</td>
+<td class='green'>4317.2878</td>
+<td class='green'>4272.6067</td>
+<td class='green'>4451.3311</td>
+<td class='green'>4496.0122</td>
+<td class='green'>4540.6933</td>
+<td >4395.0700</td>
+<td >11.5800</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >64.4200</td>
+<td >64.8500</td>
+<td >29.2700</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4421.1300</td>
+<td >4352.4500</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >-0.9510</td>
+<td >0.0673</td>
+<td >27.2028</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-03-24 19:00:00</td>
+<td >2026-03-25</td>
+<td >1</td>
+<td >2026-03-25 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >4404.3500</td>
+<td >98.3934</td>
+<td >4305.9566</td>
+<td >4502.7434</td>
+<td >4270.2785</td>
+<td >4538.4215</td>
+<td class='green'>4359.6595</td>
+<td class='green'>4314.9690</td>
+<td class='green'>4270.2785</td>
+<td class='red'>4449.0405</td>
+<td class='red'>4493.7310</td>
+<td class='red'>4538.4215</td>
+<td >4553.4200</td>
+<td >149.0700</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td >91.0200</td>
+<td >91.6800</td>
+<td >82.7000</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td >4421.1300</td>
+<td >4384.1900</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td >0.2989</td>
+<td >0.0945</td>
+<td >-5.2696</td>
+<td class='red'>Não</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-03-25 19:00:00</td>
+<td >2026-03-26</td>
+<td >1</td>
+<td >2026-03-26 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >4509.0700</td>
+<td >118.3610</td>
+<td >4390.7090</td>
+<td >4627.4310</td>
+<td >4368.2111</td>
+<td >4649.9289</td>
+<td class='red'>4462.1170</td>
+<td class='green'>4415.1641</td>
+<td class='green'>4368.2111</td>
+<td class='green'>4556.0230</td>
+<td class='green'>4602.9759</td>
+<td class='green'>4649.9289</td>
+<td >4446.3400</td>
+<td >62.7300</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >87.9400</td>
+<td >88.6700</td>
+<td >76.6100</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4516.9500</td>
+<td >4487.1300</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >-1.7967</td>
+<td >0.1291</td>
+<td >-16.8799</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-03-26 19:00:00</td>
+<td >2026-03-27</td>
+<td >1</td>
+<td >2026-03-27 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >4387.8200</td>
+<td >115.7870</td>
+<td >4272.0330</td>
+<td >4503.6070</td>
+<td >4247.2460</td>
+<td >4528.3940</td>
+<td class='green'>4340.9620</td>
+<td class='green'>4294.1040</td>
+<td class='green'>4247.2460</td>
+<td class='red'>4434.6780</td>
+<td class='green'>4481.5360</td>
+<td class='green'>4528.3940</td>
+<td >4459.6900</td>
+<td >71.8700</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >88.4000</td>
+<td >89.1400</td>
+<td >77.5400</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4402.1800</td>
+<td >4367.7000</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td >-0.2203</td>
+<td >0.2947</td>
+<td >-38.5865</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-03-30 19:00:00</td>
+<td >2026-03-31</td>
+<td >1</td>
+<td >2026-03-31 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >4497.6900</td>
+<td >108.6606</td>
+<td >4389.0294</td>
+<td >4606.3506</td>
+<td >4345.6970</td>
+<td >4649.6830</td>
+<td class='green'>4447.0257</td>
+<td class='green'>4396.3613</td>
+<td class='green'>4345.6970</td>
+<td class='red'>4548.3543</td>
+<td class='red'>4599.0187</td>
+<td class='green'>4649.6830</td>
+<td >4614.8600</td>
+<td >117.1700</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >91.5500</td>
+<td >92.2600</td>
+<td >83.8200</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4500.3700</td>
+<td >4486.2400</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >-0.8999</td>
+<td >0.2094</td>
+<td >-22.1107</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-03-31 19:00:00</td>
+<td >2026-04-01</td>
+<td >1</td>
+<td >2026-04-01 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >4671.0700</td>
+<td >109.1109</td>
+<td >4561.9591</td>
+<td >4780.1809</td>
+<td >4512.4722</td>
+<td >4829.6678</td>
+<td class='green'>4618.2041</td>
+<td class='green'>4565.3381</td>
+<td class='green'>4512.4722</td>
+<td class='red'>4723.9359</td>
+<td class='green'>4776.8019</td>
+<td class='green'>4829.6678</td>
+<td >4744.3500</td>
+<td >73.2800</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >92.3600</td>
+<td >93.0400</td>
+<td >85.4000</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4690.5300</td>
+<td >4653.2100</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td >0.6724</td>
+<td >0.3816</td>
+<td >58.1411</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-04-01 19:00:00</td>
+<td >2026-04-02</td>
+<td >1</td>
+<td >2026-04-02 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >4759.5800</td>
+<td >53.0505</td>
+<td >4706.5295</td>
+<td >4812.6305</td>
+<td >4597.7021</td>
+<td >4921.4579</td>
+<td class='red'>4705.6207</td>
+<td class='red'>4651.6614</td>
+<td class='green'>4597.7021</td>
+<td class='green'>4813.5393</td>
+<td class='green'>4867.4986</td>
+<td class='green'>4921.4579</td>
+<td >4647.6900</td>
+<td >111.8900</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.8700</td>
+<td >99.9000</td>
+<td >99.7700</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4765.8100</td>
+<td >4741.8800</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >-0.2711</td>
+<td >0.2422</td>
+<td >-1.5440</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-04-02 19:00:00</td>
+<td >2026-04-03</td>
+<td >1</td>
+<td >2026-04-03 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >4674.3500</td>
+<td >132.5795</td>
+<td >4541.7705</td>
+<td >4806.9295</td>
+<td >4514.7834</td>
+<td >4833.9166</td>
+<td class='green'>4621.1611</td>
+<td class='green'>4567.9723</td>
+<td class='green'>4514.7834</td>
+<td class='green'>4727.5389</td>
+<td class='green'>4780.7277</td>
+<td class='green'>4833.9166</td>
+<td >4672.5900</td>
+<td >1.7600</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >88.1700</td>
+<td >88.9600</td>
+<td >77.1300</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4690.5300</td>
+<td >4646.1300</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td >0.6760</td>
+<td >0.2303</td>
+<td >4.0738</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-04-06 19:00:00</td>
+<td >2026-04-07</td>
+<td >1</td>
+<td >2026-04-07 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >4650.6100</td>
+<td >59.0786</td>
+<td >4591.5314</td>
+<td >4709.6886</td>
+<td >4492.4383</td>
+<td >4808.7817</td>
+<td class='green'>4597.8861</td>
+<td class='green'>4545.1622</td>
+<td class='green'>4492.4383</td>
+<td class='green'>4703.3339</td>
+<td class='green'>4756.0578</td>
+<td class='green'>4808.7817</td>
+<td >4621.8400</td>
+<td >28.7700</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.5800</td>
+<td >99.6800</td>
+<td >99.2500</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4690.5300</td>
+<td >4648.7700</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >-0.3100</td>
+<td >0.1438</td>
+<td >-11.1207</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-04-07 19:00:00</td>
+<td >2026-04-08</td>
+<td >1</td>
+<td >2026-04-08 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >4667.7900</td>
+<td >55.7361</td>
+<td >4612.0539</td>
+<td >4723.5261</td>
+<td >4510.7939</td>
+<td >4824.7861</td>
+<td class='green'>4615.4580</td>
+<td class='green'>4563.1259</td>
+<td class='green'>4510.7939</td>
+<td class='red'>4720.1220</td>
+<td class='red'>4772.4541</td>
+<td class='green'>4824.7861</td>
+<td >4780.0500</td>
+<td >112.2600</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.7200</td>
+<td >99.7900</td>
+<td >99.5100</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4690.5300</td>
+<td >4657.3900</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td >-0.0979</td>
+<td >0.1273</td>
+<td >11.8063</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-04-08 19:00:00</td>
+<td >2026-04-09</td>
+<td >1</td>
+<td >2026-04-09 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >4715.4500</td>
+<td >109.7101</td>
+<td >4605.7399</td>
+<td >4825.1601</td>
+<td >4556.2583</td>
+<td >4874.6417</td>
+<td class='green'>4662.3861</td>
+<td class='green'>4609.3222</td>
+<td class='green'>4556.2583</td>
+<td class='red'>4768.5139</td>
+<td class='green'>4821.5778</td>
+<td class='green'>4874.6417</td>
+<td >4770.7900</td>
+<td >55.3400</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >92.3200</td>
+<td >93.0000</td>
+<td >85.3300</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4736.9700</td>
+<td >4699.5800</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >-0.6187</td>
+<td >0.3736</td>
+<td >-25.5350</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-04-09 19:00:00</td>
+<td >2026-04-10</td>
+<td >1</td>
+<td >2026-04-10 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >4779.5800</td>
+<td >50.3660</td>
+<td >4729.2140</td>
+<td >4829.9460</td>
+<td >4617.6226</td>
+<td >4941.5374</td>
+<td class='green'>4725.5942</td>
+<td class='green'>4671.6084</td>
+<td class='green'>4617.6226</td>
+<td class='green'>4833.5658</td>
+<td class='green'>4887.5516</td>
+<td class='green'>4941.5374</td>
+<td >4780.0000</td>
+<td >0.4200</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.9200</td>
+<td >99.9500</td>
+<td >99.8700</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4836.2500</td>
+<td >4767.6500</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td >-0.0901</td>
+<td >0.2433</td>
+<td >14.4008</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-04-13 19:00:00</td>
+<td >2026-04-14</td>
+<td >1</td>
+<td >2026-04-14 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >4734.6500</td>
+<td >62.8866</td>
+<td >4671.7634</td>
+<td >4797.5366</td>
+<td >4576.6119</td>
+<td >4892.6881</td>
+<td class='green'>4681.9706</td>
+<td class='green'>4629.2913</td>
+<td class='green'>4576.6119</td>
+<td class='red'>4787.3294</td>
+<td class='green'>4840.0087</td>
+<td class='green'>4892.6881</td>
+<td >4794.7600</td>
+<td >60.1100</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.3300</td>
+<td >99.4700</td>
+<td >98.8000</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4736.9700</td>
+<td >4723.1700</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td >0.0866</td>
+<td >0.1067</td>
+<td >7.8189</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-04-14 19:00:00</td>
+<td >2026-04-15</td>
+<td >1</td>
+<td >2026-04-15 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >4840.9000</td>
+<td >58.9450</td>
+<td >4781.9550</td>
+<td >4899.8450</td>
+<td >4682.0587</td>
+<td >4999.7413</td>
+<td class='green'>4787.9529</td>
+<td class='green'>4735.0058</td>
+<td class='green'>4682.0587</td>
+<td class='green'>4893.8471</td>
+<td class='green'>4946.7942</td>
+<td class='green'>4999.7413</td>
+<td >4828.6200</td>
+<td >12.2800</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.6000</td>
+<td >99.6900</td>
+<td >99.2900</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4843.8600</td>
+<td >4809.0600</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >0.4347</td>
+<td >0.4493</td>
+<td >28.2224</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-04-15 19:00:00</td>
+<td >2026-04-16</td>
+<td >1</td>
+<td >2026-04-16 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >4798.6300</td>
+<td >28.4061</td>
+<td >4770.2239</td>
+<td >4827.0361</td>
+<td >4645.7546</td>
+<td >4951.5054</td>
+<td class='green'>4747.6715</td>
+<td class='green'>4696.7131</td>
+<td class='green'>4645.7546</td>
+<td class='green'>4849.5885</td>
+<td class='green'>4900.5469</td>
+<td class='green'>4951.5054</td>
+<td >4800.7600</td>
+<td >2.1300</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >100.0000</td>
+<td >100.0000</td>
+<td >100.0000</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4836.2500</td>
+<td >4787.0000</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >-0.0001</td>
+<td >0.2256</td>
+<td >-7.5173</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-04-16 19:00:00</td>
+<td >2026-04-17</td>
+<td >1</td>
+<td >2026-04-17 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >4789.9400</td>
+<td >30.8358</td>
+<td >4759.1042</td>
+<td >4820.7758</td>
+<td >4644.1308</td>
+<td >4935.7492</td>
+<td class='green'>4741.3369</td>
+<td class='green'>4692.7339</td>
+<td class='green'>4644.1308</td>
+<td class='red'>4838.5431</td>
+<td class='green'>4887.1461</td>
+<td class='green'>4935.7492</td>
+<td >4866.8900</td>
+<td >76.9500</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >100.0000</td>
+<td >100.0000</td>
+<td >100.0000</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4836.2500</td>
+<td >4773.1400</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >-0.0210</td>
+<td >0.2397</td>
+<td >-7.6984</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-04-20 19:00:00</td>
+<td >2026-04-21</td>
+<td >1</td>
+<td >2026-04-21 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >4820.3600</td>
+<td >44.3500</td>
+<td >4776.0100</td>
+<td >4864.7100</td>
+<td >4722.9663</td>
+<td >4966.4506</td>
+<td class='green'>4771.6631</td>
+<td class='green'>4722.9663</td>
+<td class='green'>4674.2694</td>
+<td class='green'>4869.0569</td>
+<td class='green'>4917.7537</td>
+<td class='green'>4966.4506</td>
+<td >4778.3100</td>
+<td >42.0500</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.9400</td>
+<td >98.6700</td>
+<td >98.6200</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4836.2500</td>
+<td >4792.6800</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td >0.3859</td>
+<td >0.0507</td>
+<td >6.2892</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-04-21 19:00:00</td>
+<td >2026-04-22</td>
+<td >1</td>
+<td >2026-04-22 14:00:00</td>
+<td >strangle</td>
+<td >TREND_BEAR</td>
+<td >4707.2200</td>
+<td >57.6224</td>
+<td >4649.5976</td>
+<td >4764.8424</td>
+<td >4565.1880</td>
+<td >4849.2520</td>
+<td class='green'>4659.8760</td>
+<td class='green'>4612.5320</td>
+<td class='green'>4565.1880</td>
+<td class='green'>4754.5640</td>
+<td class='green'>4801.9080</td>
+<td class='green'>4849.2520</td>
+<td >4745.3800</td>
+<td >38.1600</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.2400</td>
+<td >99.3800</td>
+<td >98.6300</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4736.9700</td>
+<td >4692.2400</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td >-0.1198</td>
+<td >0.4593</td>
+<td >-28.0792</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-04-22 19:00:00</td>
+<td >2026-04-23</td>
+<td >1</td>
+<td >2026-04-23 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >4738.4800</td>
+<td >39.5219</td>
+<td >4698.9581</td>
+<td >4778.0019</td>
+<td >4595.2935</td>
+<td >4881.6665</td>
+<td class='green'>4690.7512</td>
+<td class='green'>4643.0223</td>
+<td class='green'>4595.2935</td>
+<td class='green'>4786.2088</td>
+<td class='green'>4833.9377</td>
+<td class='green'>4881.6665</td>
+<td >4724.1200</td>
+<td >14.3600</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.9800</td>
+<td >99.9900</td>
+<td >99.9700</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4750.8500</td>
+<td >4723.7400</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >0.1017</td>
+<td >0.1904</td>
+<td >-0.2133</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-04-23 19:00:00</td>
+<td >2026-04-24</td>
+<td >1</td>
+<td >2026-04-24 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >4696.0800</td>
+<td >91.6882</td>
+<td >4604.3918</td>
+<td >4787.7682</td>
+<td >4554.8690</td>
+<td >4837.2910</td>
+<td class='green'>4649.0097</td>
+<td class='green'>4601.9394</td>
+<td class='green'>4554.8690</td>
+<td class='green'>4743.1503</td>
+<td class='green'>4790.2206</td>
+<td class='green'>4837.2910</td>
+<td >4731.2800</td>
+<td >35.2000</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >93.5400</td>
+<td >94.1100</td>
+<td >87.6500</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4736.9700</td>
+<td >4664.2800</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >-0.6100</td>
+<td >0.1744</td>
+<td >-13.8424</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-04-27 19:00:00</td>
+<td >2026-04-28</td>
+<td >1</td>
+<td >2026-04-28 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >4680.1000</td>
+<td >31.3525</td>
+<td >4648.7475</td>
+<td >4711.4525</td>
+<td >4541.3730</td>
+<td >4818.8270</td>
+<td class='red'>4633.8577</td>
+<td class='red'>4587.6153</td>
+<td class='green'>4541.3730</td>
+<td class='green'>4726.3423</td>
+<td class='green'>4772.5847</td>
+<td class='green'>4818.8270</td>
+<td >4568.1500</td>
+<td >111.9500</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >100.0000</td>
+<td >100.0000</td>
+<td >100.0000</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4690.5300</td>
+<td >4667.2000</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >-0.0364</td>
+<td >0.2245</td>
+<td >-2.2575</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-04-28 19:00:00</td>
+<td >2026-04-29</td>
+<td >1</td>
+<td >2026-04-29 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >4595.5500</td>
+<td >43.9144</td>
+<td >4551.6356</td>
+<td >4639.4644</td>
+<td >4461.5535</td>
+<td >4729.5465</td>
+<td class='red'>4550.8845</td>
+<td class='green'>4506.2190</td>
+<td class='green'>4461.5535</td>
+<td class='green'>4640.2155</td>
+<td class='green'>4684.8810</td>
+<td class='green'>4729.5465</td>
+<td >4525.9900</td>
+<td >69.5600</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.8700</td>
+<td >99.9000</td>
+<td >99.7700</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4601.0000</td>
+<td >4557.1700</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >0.0680</td>
+<td >0.1857</td>
+<td >7.5504</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-04-29 19:00:00</td>
+<td >2026-04-30</td>
+<td >1</td>
+<td >2026-04-30 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >4547.6200</td>
+<td >41.7517</td>
+<td >4505.8683</td>
+<td >4589.3717</td>
+<td >4460.7709</td>
+<td >4677.8936</td>
+<td class='green'>4504.1955</td>
+<td class='green'>4460.7709</td>
+<td class='green'>4417.3464</td>
+<td class='red'>4591.0445</td>
+<td class='green'>4634.4691</td>
+<td class='green'>4677.8936</td>
+<td >4620.3300</td>
+<td >72.7100</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.9000</td>
+<td >98.2100</td>
+<td >98.1100</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4601.0000</td>
+<td >4518.1000</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td >0.4651</td>
+<td >0.0933</td>
+<td >-6.9721</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-04-30 19:00:00</td>
+<td >2026-05-01</td>
+<td >1</td>
+<td >2026-05-01 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >4624.0000</td>
+<td >38.2298</td>
+<td >4585.7702</td>
+<td >4662.2298</td>
+<td >4490.9114</td>
+<td >4757.0886</td>
+<td class='green'>4579.6371</td>
+<td class='green'>4535.2743</td>
+<td class='green'>4490.9114</td>
+<td class='green'>4668.3629</td>
+<td class='green'>4712.7257</td>
+<td class='green'>4757.0886</td>
+<td >4655.9600</td>
+<td >31.9600</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.9700</td>
+<td >99.9800</td>
+<td >99.9500</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4630.0900</td>
+<td >4605.0100</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >0.2246</td>
+<td >0.1639</td>
+<td >-1.1974</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-05-04 19:00:00</td>
+<td >2026-05-05</td>
+<td >1</td>
+<td >2026-05-05 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >4518.8800</td>
+<td >69.6923</td>
+<td >4449.1877</td>
+<td >4588.5723</td>
+<td >4389.4297</td>
+<td >4648.3303</td>
+<td class='green'>4475.7299</td>
+<td class='green'>4432.5798</td>
+<td class='green'>4389.4297</td>
+<td class='red'>4562.0301</td>
+<td class='green'>4605.1802</td>
+<td class='green'>4648.3303</td>
+<td >4573.4600</td>
+<td >54.5800</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >96.6500</td>
+<td >97.0300</td>
+<td >93.6700</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4601.0000</td>
+<td >4509.7600</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td >0.0071</td>
+<td >0.3759</td>
+<td >-10.3099</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-05-05 19:00:00</td>
+<td >2026-05-06</td>
+<td >1</td>
+<td >2026-05-06 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >4557.0800</td>
+<td >28.6604</td>
+<td >4528.4196</td>
+<td >4585.7404</td>
+<td >4428.3890</td>
+<td >4685.7710</td>
+<td class='green'>4514.1830</td>
+<td class='green'>4471.2860</td>
+<td class='green'>4428.3890</td>
+<td class='red'>4599.9770</td>
+<td class='red'>4642.8740</td>
+<td class='red'>4685.7710</td>
+<td >4710.9200</td>
+<td >153.8400</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td >100.0000</td>
+<td >100.0000</td>
+<td >100.0000</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td >4601.0000</td>
+<td >4553.1200</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td >-0.2132</td>
+<td >0.1523</td>
+<td >-4.8214</td>
+<td class='red'>Não</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-05-06 19:00:00</td>
+<td >2026-05-07</td>
+<td >1</td>
+<td >2026-05-07 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >4695.0900</td>
+<td >42.2342</td>
+<td >4652.8558</td>
+<td >4737.3242</td>
+<td >4561.8650</td>
+<td >4828.3150</td>
+<td class='green'>4650.6817</td>
+<td class='green'>4606.2734</td>
+<td class='green'>4561.8650</td>
+<td class='red'>4739.4983</td>
+<td class='green'>4783.9066</td>
+<td class='green'>4828.3150</td>
+<td >4751.7900</td>
+<td >56.7000</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.9100</td>
+<td >99.9300</td>
+<td >99.8400</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4736.9700</td>
+<td >4678.8200</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td >0.3788</td>
+<td >0.0824</td>
+<td >-7.1120</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-05-07 19:00:00</td>
+<td >2026-05-08</td>
+<td >1</td>
+<td >2026-05-08 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >4709.9300</td>
+<td >71.3787</td>
+<td >4638.5513</td>
+<td >4781.3087</td>
+<td >4577.9703</td>
+<td >4841.8897</td>
+<td class='green'>4665.9434</td>
+<td class='green'>4621.9568</td>
+<td class='green'>4577.9703</td>
+<td class='green'>4753.9166</td>
+<td class='green'>4797.9032</td>
+<td class='green'>4841.8897</td>
+<td >4731.4900</td>
+<td >21.5600</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >96.5900</td>
+<td >96.9600</td>
+<td >93.5500</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4736.9700</td>
+<td >4695.3100</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >-0.0557</td>
+<td >0.2576</td>
+<td >-19.6501</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-05-11 19:00:00</td>
+<td >2026-05-12</td>
+<td >1</td>
+<td >2026-05-12 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >4724.6900</td>
+<td >41.1812</td>
+<td >4683.5088</td>
+<td >4765.8712</td>
+<td >4592.8422</td>
+<td >4856.5378</td>
+<td class='green'>4680.7407</td>
+<td class='green'>4636.7915</td>
+<td class='green'>4592.8422</td>
+<td class='green'>4768.6393</td>
+<td class='green'>4812.5885</td>
+<td class='green'>4856.5378</td>
+<td >4692.7000</td>
+<td >31.9900</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.9200</td>
+<td >99.9400</td>
+<td >99.8600</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4736.9700</td>
+<td >4707.9800</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >0.0314</td>
+<td >0.1651</td>
+<td >-0.8291</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-05-12 19:00:00</td>
+<td >2026-05-13</td>
+<td >1</td>
+<td >2026-05-13 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >4699.8300</td>
+<td >58.9578</td>
+<td >4640.8722</td>
+<td >4758.7878</td>
+<td >4569.5255</td>
+<td >4830.1345</td>
+<td class='green'>4656.3952</td>
+<td class='green'>4612.9604</td>
+<td class='green'>4569.5255</td>
+<td class='green'>4743.2648</td>
+<td class='green'>4786.6996</td>
+<td class='green'>4830.1345</td>
+<td >4681.2100</td>
+<td >18.6200</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >98.5400</td>
+<td >98.7500</td>
+<td >97.2900</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4736.9700</td>
+<td >4638.2400</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td >0.6466</td>
+<td >0.1314</td>
+<td >8.5254</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-05-13 19:00:00</td>
+<td >2026-05-14</td>
+<td >1</td>
+<td >2026-05-14 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >4688.9700</td>
+<td >28.2957</td>
+<td >4660.6743</td>
+<td >4717.2657</td>
+<td >4559.9262</td>
+<td >4818.0138</td>
+<td class='green'>4645.9554</td>
+<td class='green'>4602.9408</td>
+<td class='green'>4559.9262</td>
+<td class='green'>4731.9846</td>
+<td class='green'>4774.9992</td>
+<td class='green'>4818.0138</td>
+<td >4687.6600</td>
+<td >1.3100</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >100.0000</td>
+<td >100.0000</td>
+<td >100.0000</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4690.5300</td>
+<td >4677.4700</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >-0.0570</td>
+<td >0.0662</td>
+<td >-1.9650</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-05-14 19:00:00</td>
+<td >2026-05-15</td>
+<td >1</td>
+<td >2026-05-15 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >4667.3700</td>
+<td >34.6237</td>
+<td >4632.7463</td>
+<td >4701.9937</td>
+<td >4540.8125</td>
+<td >4793.9275</td>
+<td class='red'>4625.1842</td>
+<td class='red'>4582.9984</td>
+<td class='green'>4540.8125</td>
+<td class='green'>4709.5558</td>
+<td class='green'>4751.7416</td>
+<td class='green'>4793.9275</td>
+<td >4543.1400</td>
+<td >124.2300</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.9800</td>
+<td >99.9900</td>
+<td >99.9700</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4690.5300</td>
+<td >4666.2900</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td >-0.3220</td>
+<td >0.2202</td>
+<td >-7.1687</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-05-18 19:00:00</td>
+<td >2026-05-19</td>
+<td >1</td>
+<td >2026-05-19 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >4554.3000</td>
+<td >54.3352</td>
+<td >4499.9648</td>
+<td >4608.6352</td>
+<td >4431.0020</td>
+<td >4677.5980</td>
+<td class='red'>4513.2007</td>
+<td class='green'>4472.1014</td>
+<td class='green'>4431.0020</td>
+<td class='green'>4595.3993</td>
+<td class='green'>4636.4986</td>
+<td class='green'>4677.5980</td>
+<td >4492.6400</td>
+<td >61.6600</td>
+<td class='red'>Não</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >98.7400</td>
+<td >98.9300</td>
+<td >97.6700</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4601.0000</td>
+<td >4534.1100</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td >0.4774</td>
+<td >0.1626</td>
+<td >0.5192</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-05-19 19:00:00</td>
+<td >2026-05-20</td>
+<td >1</td>
+<td >2026-05-20 14:00:00</td>
+<td >strangle</td>
+<td >RANGE</td>
+<td >4496.8600</td>
+<td >45.6290</td>
+<td >4451.2310</td>
+<td >4542.4890</td>
+<td >4374.9260</td>
+<td >4618.7940</td>
+<td class='green'>4456.2153</td>
+<td class='green'>4415.5707</td>
+<td class='green'>4374.9260</td>
+<td class='green'>4537.5047</td>
+<td class='green'>4578.1493</td>
+<td class='green'>4618.7940</td>
+<td >4476.7500</td>
+<td >20.1100</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >99.5800</td>
+<td >99.6600</td>
+<td >99.2400</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4500.3700</td>
+<td >4496.0100</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >-0.1389</td>
+<td >0.1661</td>
+<td >-3.8908</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-05-20 19:00:00</td>
+<td >2026-05-21</td>
+<td >1</td>
+<td >2026-05-21 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >4543.6800</td>
+<td >69.8138</td>
+<td >4473.8662</td>
+<td >4613.4938</td>
+<td >4421.0558</td>
+<td >4666.3042</td>
+<td class='green'>4502.8053</td>
+<td class='green'>4461.9305</td>
+<td class='green'>4421.0558</td>
+<td class='green'>4584.5547</td>
+<td class='green'>4625.4295</td>
+<td class='green'>4666.3042</td>
+<td >4508.1400</td>
+<td >35.5400</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >95.8500</td>
+<td >96.2500</td>
+<td >92.1000</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4601.0000</td>
+<td >4523.9700</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td >0.4032</td>
+<td >0.3113</td>
+<td >14.0008</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+<tr>
+<td >2026-05-21 19:00:00</td>
+<td >2026-05-22</td>
+<td >1</td>
+<td >2026-05-22 14:00:00</td>
+<td >strangle</td>
+<td >MANIPULATION</td>
+<td >4537.6700</td>
+<td >57.2035</td>
+<td >4480.4665</td>
+<td >4594.8735</td>
+<td >4418.3636</td>
+<td >4656.9764</td>
+<td class='red'>4497.9012</td>
+<td class='green'>4458.1324</td>
+<td class='green'>4418.3636</td>
+<td class='green'>4577.4388</td>
+<td class='green'>4617.2076</td>
+<td class='green'>4656.9764</td>
+<td >4497.4700</td>
+<td >40.2000</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >98.0200</td>
+<td >98.2700</td>
+<td >96.3000</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td class='green'>Sim</td>
+<td >4601.0000</td>
+<td >4527.2800</td>
+<td class='red'>Não</td>
+<td class='green'>Sim</td>
+<td >0.0125</td>
+<td >0.3338</td>
+<td >28.7498</td>
+<td class='green'>Sim</td>
+<td >close_within_primary_put_call</td>
+</tr>
+</table>
+</body>
+</html>
