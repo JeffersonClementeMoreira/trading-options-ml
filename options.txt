@@ -3,6 +3,10 @@
 input string InpFilenameSuffix = "_features_mt5.csv";
 input bool InpExportOnNewCandle = true;
 input bool InpOverwriteOnEachCandle = true;
+input bool InpUseRealtimeHttp = true;
+input string InpRealtimeUrl = "http://127.0.0.1:8765/mt5/candle";
+input int InpHttpTimeoutMs = 1200;
+input bool InpEnableCsvBackup = false;
 
 datetime last_bar = 0;
 
@@ -203,6 +207,77 @@ string RegimeLabel()
    return "MANIPULATION";
 }
 
+bool SendRealtimeJson()
+{
+   datetime ts = iTime(_Symbol,_Period,1);
+   string date_str = TimeToString(ts, TIME_DATE);
+   string time_str = TimeToString(ts, TIME_MINUTES);
+
+   double o = iOpen(_Symbol,_Period,1);
+   double h = iHigh(_Symbol,_Period,1);
+   double l = iLow(_Symbol,_Period,1);
+   double c = iClose(_Symbol,_Period,1);
+
+   double ret1 = Ret(1);
+   double ret3 = Ret(3);
+   double atr = ATR_pct();
+   double er = ER();
+   double kama_slope = KamaSlope();
+   double rv = RealizedVol();
+   double em = ExpectedMove();
+   double flow = FlowScore();
+   string regime_label = RegimeLabel();
+   int sweep_up = SweepTop();
+   int sweep_down = SweepBottom();
+   double dist = DistMean();
+
+   string payload = "{";
+   payload += "\"symbol\":\"" + _Symbol + "\",";
+   payload += "\"timeframe\":\"" + TimeframeLabel() + "\",";
+   payload += "\"datetime\":\"" + TimeToString(ts, TIME_DATE|TIME_MINUTES) + "\",";
+   payload += "\"date\":\"" + date_str + "\",";
+   payload += "\"time\":\"" + time_str + "\",";
+   payload += "\"open\":" + DoubleToString(o, 10) + ",";
+   payload += "\"high\":" + DoubleToString(h, 10) + ",";
+   payload += "\"low\":" + DoubleToString(l, 10) + ",";
+   payload += "\"close\":" + DoubleToString(c, 10) + ",";
+   payload += "\"mt5_er_mean\":" + DoubleToString(er, 10) + ",";
+   payload += "\"mt5_kama_slope\":" + DoubleToString(kama_slope, 10) + ",";
+   payload += "\"mt5_flow_score\":" + DoubleToString(flow, 10) + ",";
+   payload += "\"mt5_regime\":\"" + regime_label + "\",";
+   payload += "\"mt5_realized_vol\":" + DoubleToString(rv, 10) + ",";
+   payload += "\"mt5_expected_move\":" + DoubleToString(em, 10) + ",";
+   payload += "\"mt5_atr_pct\":" + DoubleToString(atr, 10) + ",";
+   payload += "\"mt5_sweep_top\":" + IntegerToString(sweep_up) + ",";
+   payload += "\"mt5_sweep_bottom\":" + IntegerToString(sweep_down) + ",";
+   payload += "\"mt5_ret_1\":" + DoubleToString(ret1, 10) + ",";
+   payload += "\"mt5_ret_3\":" + DoubleToString(ret3, 10) + ",";
+   payload += "\"mt5_dist_mean\":" + DoubleToString(dist, 10);
+   payload += "}";
+
+   char post_data[];
+   StringToCharArray(payload, post_data, 0, -1, CP_UTF8);
+   if(ArraySize(post_data) > 0)
+      ArrayResize(post_data, ArraySize(post_data) - 1);
+
+   char result[];
+   string result_headers;
+   string headers = "Content-Type: application/json\r\n";
+   ResetLastError();
+   int status = WebRequest("POST", InpRealtimeUrl, headers, InpHttpTimeoutMs, post_data, result, result_headers);
+   if(status == -1)
+   {
+      Print("Realtime HTTP falhou. GetLastError=", GetLastError());
+      return false;
+   }
+   if(status < 200 || status >= 300)
+   {
+      Print("Realtime HTTP status invalido: ", status);
+      return false;
+   }
+   return true;
+}
+
 // ===== EXPORT =====
 void ExportFeatures()
 {
@@ -294,13 +369,21 @@ void OnTick()
       last_bar = current;
 
       // Apenas candle fechado (shift 1)
-      ExportFeatures();
-      Alert("Candle exportado: ", TimeToString(iTime(_Symbol,_Period,1), TIME_DATE|TIME_MINUTES));
+      bool sent_ok = true;
+      if(InpUseRealtimeHttp)
+         sent_ok = SendRealtimeJson();
+
+      if(InpEnableCsvBackup || !InpUseRealtimeHttp || !sent_ok)
+         ExportFeatures();
+
+      Alert("Candle processado: ", TimeToString(iTime(_Symbol,_Period,1), TIME_DATE|TIME_MINUTES));
    }
 }
 
 int OnInit()
 {
+   if(InpUseRealtimeHttp)
+      Print("Realtime HTTP ativo em: ", InpRealtimeUrl);
    Print("EA iniciado. Exportando para: ", BuildFilename());
    Print("Símbolo: ", _Symbol);
    Print("Período: ", _Period);
