@@ -5,6 +5,34 @@ string filename = "features_mt5.csv";
 datetime last_bar = 0;
 bool header_written = false;
 
+double MAValue(int period, int method, int applied_price, int shift)
+{
+   int handle = iMA(_Symbol, _Period, period, 0, method, applied_price);
+   if(handle == INVALID_HANDLE) return 0;
+
+   double buf[];
+   ArraySetAsSeries(buf, true);
+   int copied = CopyBuffer(handle, 0, shift, 1, buf);
+   IndicatorRelease(handle);
+
+   if(copied <= 0) return 0;
+   return buf[0];
+}
+
+double ATRValue(int period, int shift)
+{
+   int handle = iATR(_Symbol, _Period, period);
+   if(handle == INVALID_HANDLE) return 0;
+
+   double buf[];
+   ArraySetAsSeries(buf, true);
+   int copied = CopyBuffer(handle, 0, shift, 1, buf);
+   IndicatorRelease(handle);
+
+   if(copied <= 0) return 0;
+   return buf[0];
+}
+
 // ===== FUNÇÕES BASE =====
 
 double Ret(int shift)
@@ -18,7 +46,7 @@ double Ret(int shift)
 // ATR percentual
 double ATR_pct(int period=14)
 {
-   double atr = iATR(_Symbol,_Period,period,1);
+   double atr = ATRValue(period, 1);
    double close = iClose(_Symbol,_Period,1);
    if(close == 0) return 0;
    return atr / close;
@@ -40,8 +68,8 @@ double ER(int period=20)
 // KAMA slope (normalizado)
 double KamaSlope()
 {
-   double kama_now = iMA(_Symbol,_Period,10,0,MODE_EMA,PRICE_CLOSE,1);
-   double kama_prev = iMA(_Symbol,_Period,10,0,MODE_EMA,PRICE_CLOSE,2);
+   double kama_now = MAValue(10, MODE_EMA, PRICE_CLOSE, 1);
+   double kama_prev = MAValue(10, MODE_EMA, PRICE_CLOSE, 2);
    double close = iClose(_Symbol,_Period,1);
    if(close == 0) return 0;
    return (kama_now - kama_prev)/close;
@@ -122,7 +150,7 @@ int Regime()
 
 double DistMean()
 {
-   double ma = iMA(_Symbol,_Period,20,0,MODE_SMA,PRICE_CLOSE,1);
+   double ma = MAValue(20, MODE_SMA, PRICE_CLOSE, 1);
    double close = iClose(_Symbol,_Period,1);
 
    if(close == 0) return 0;
@@ -143,11 +171,17 @@ string RegimeLabel()
 // ===== EXPORT =====
 void ExportFeatures()
 {
-   int file = FileOpen(filename, FILE_CSV|FILE_WRITE, ',');
-   if(file == INVALID_HANDLE) return;
+   int file = FileOpen(filename, FILE_CSV|FILE_READ|FILE_WRITE, ',');
+   if(file == INVALID_HANDLE)
+      file = FileOpen(filename, FILE_CSV|FILE_WRITE, ',');
+   if(file == INVALID_HANDLE)
+      return;
+
+   FileSeek(file, 0, SEEK_END);
+   bool is_empty = (FileTell(file) == 0);
 
    // ===== HEADER (1ª vez) =====
-   if(!header_written)
+   if(!header_written && is_empty)
    {
       FileWrite(file,
          "datetime","date","time",
