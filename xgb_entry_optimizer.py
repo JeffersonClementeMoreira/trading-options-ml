@@ -23,6 +23,32 @@ DIRECTION_FLAT = 1
 DIRECTION_UP = 2
 
 
+class _ConstantBinaryModel:
+    def __init__(self, positive_prob: float) -> None:
+        self.positive_prob = float(np.clip(positive_prob, 0.0, 1.0))
+
+    def predict_proba(self, X: pd.DataFrame) -> np.ndarray:
+        n = len(X)
+        p1 = np.full(n, self.positive_prob, dtype=float)
+        p0 = 1.0 - p1
+        return np.column_stack([p0, p1])
+
+
+class _ConstantMulticlassModel:
+    def __init__(self, probs: np.ndarray) -> None:
+        arr = np.asarray(probs, dtype=float)
+        s = float(arr.sum())
+        if s <= 0:
+            arr = np.full_like(arr, 1.0 / len(arr))
+        else:
+            arr = arr / s
+        self.probs = arr
+
+    def predict_proba(self, X: pd.DataFrame) -> np.ndarray:
+        n = len(X)
+        return np.tile(self.probs, (n, 1))
+
+
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Treino XGBoost para direcao + estrategia")
     parser.add_argument("--file", type=str, required=True, help="CSV OHLC")
@@ -132,6 +158,17 @@ def _prepare_features(df: pd.DataFrame, allow_post_entry_features: bool = False)
 
 
 def _train_multiclass_xgb(XGBClassifier: object, X_train: pd.DataFrame, y_train: pd.Series, num_class: int) -> object:
+    uniq = sorted(pd.Series(y_train).dropna().astype(int).unique().tolist())
+    if len(uniq) < 2 or num_class < 2:
+        # Janela pequena pode ter apenas uma classe no treino.
+        probs = np.zeros(max(num_class, 1), dtype=float)
+        if len(uniq) == 1 and uniq[0] < len(probs):
+            probs[uniq[0]] = 1.0
+        elif len(probs) > 0:
+            probs[:] = 1.0 / len(probs)
+        print(f"Aviso: treino direcional com classe unica ({uniq}); usando modelo constante.")
+        return _ConstantMulticlassModel(probs)
+
     model = XGBClassifier(
         objective="multi:softprob",
         num_class=num_class,
@@ -150,6 +187,12 @@ def _train_multiclass_xgb(XGBClassifier: object, X_train: pd.DataFrame, y_train:
 
 
 def _train_binary_xgb(XGBClassifier: object, X_train: pd.DataFrame, y_train: pd.Series) -> object:
+    uniq = sorted(pd.Series(y_train).dropna().astype(int).unique().tolist())
+    if len(uniq) < 2:
+        positive_prob = float(uniq[0]) if len(uniq) == 1 else 0.5
+        print(f"Aviso: treino binario com classe unica ({uniq}); usando modelo constante p(1)={positive_prob:.2f}.")
+        return _ConstantBinaryModel(positive_prob)
+
     model = XGBClassifier(
         objective="binary:logistic",
         n_estimators=250,
