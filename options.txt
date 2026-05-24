@@ -1,9 +1,10 @@
 #property strict
 
-string filename_suffix = "_features_mt5.csv";
+input string InpFilenameSuffix = "_features_mt5.csv";
+input bool InpExportOnNewCandle = true;
+input bool InpOverwriteOnEachCandle = true;
 
 datetime last_bar = 0;
-bool header_written = false;
 
 string TimeframeLabel()
 {
@@ -36,7 +37,7 @@ string TimeframeLabel()
 
 string BuildFilename()
 {
-   return _Symbol + "_" + TimeframeLabel() + filename_suffix;
+   return _Symbol + "_" + TimeframeLabel() + InpFilenameSuffix;
 }
 
 double MAValue(int period, ENUM_MA_METHOD method, ENUM_APPLIED_PRICE applied_price, int shift)
@@ -206,38 +207,32 @@ string RegimeLabel()
 void ExportFeatures()
 {
    string filename = BuildFilename();
-   int file = FileOpen(filename, FILE_CSV|FILE_READ|FILE_WRITE, ',');
-   if(file == INVALID_HANDLE)
-      file = FileOpen(filename, FILE_CSV|FILE_WRITE, ',');
+   if(InpOverwriteOnEachCandle)
+      FileDelete(filename);
+
+   int file = FileOpen(filename, FILE_CSV|FILE_WRITE, ',');
    if(file == INVALID_HANDLE)
       return;
 
-   FileSeek(file, 0, SEEK_END);
-   bool is_empty = (FileTell(file) == 0);
-
    // ===== HEADER (1ª vez) =====
-   if(!header_written && is_empty)
-   {
-      FileWrite(file,
-         "symbol",
-         "timeframe",
-         "datetime","date","time",
-         "open","high","low","close",
-         "mt5_er_mean",
-         "mt5_kama_slope",
-         "mt5_flow_score",
-         "mt5_regime",
-         "mt5_realized_vol",
-         "mt5_expected_move",
-         "mt5_atr_pct",
-         "mt5_sweep_top",
-         "mt5_sweep_bottom",
-         "mt5_ret_1",
-         "mt5_ret_3",
-         "mt5_dist_mean"
-      );
-      header_written = true;
-   }
+   FileWrite(file,
+      "symbol",
+      "timeframe",
+      "datetime","date","time",
+      "open","high","low","close",
+      "mt5_er_mean",
+      "mt5_kama_slope",
+      "mt5_flow_score",
+      "mt5_regime",
+      "mt5_realized_vol",
+      "mt5_expected_move",
+      "mt5_atr_pct",
+      "mt5_sweep_top",
+      "mt5_sweep_bottom",
+      "mt5_ret_1",
+      "mt5_ret_3",
+      "mt5_dist_mean"
+   );
 
    // ===== FEATURES =====
    datetime ts = iTime(_Symbol,_Period,1);
@@ -289,6 +284,9 @@ void ExportFeatures()
 
 void OnTick()
 {
+   if(!InpExportOnNewCandle)
+      return;
+
    datetime current = iTime(_Symbol,_Period,0);
 
    if(current != last_bar)
