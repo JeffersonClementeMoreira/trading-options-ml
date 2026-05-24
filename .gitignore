@@ -44,6 +44,7 @@ logs/
 
 # Analytics & backtest outputs (regenerated)
 analytics/stats/*.csv
+analytics/stats/*.html
 backtests/
 
 # Predictions (temporary)
