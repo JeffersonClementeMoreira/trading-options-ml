@@ -217,6 +217,151 @@ def _std_norm_cdf(x: float) -> float:
     return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
 
 
+def _evaluate_trigger_conditions(
+    df: pd.DataFrame,
+    sd_payload: dict,
+) -> dict:
+    """
+    Avalia condições de TRIGGER de forma FLEXÍVEL (não é imposição rígida).
+    
+    Retorna scores para cada trigger:
+    - distance_to_sd_pct: Quão perto está da SD? (0% = dentro, >1% = longe)
+    - sd_quality_score: Score 0-100 (100 = dentro da SD)
+    - fvg_proximity_score: Score 0-100 (100 = exatamente em cima do FVG)
+    - overall_entry_quality: Score 0-100 baseado em TODOS os fatores
+    
+    Permite que o usuário AVALIE manualmente se quer entrar ou não.
+    
+    Args:
+        df: DataFrame com OHLC
+        sd_payload: Supply/Demand zones from evaluate_sd_confluence
+    
+    Returns:
+        dict com scores e análise detalhada (sem imposições)
+    """
+    if df.empty:
+        return {
+            "distance_to_sd_pct": None,
+            "sd_quality_score": 0,
+            "in_sd_zone": False,
+            "closest_sd_zone": None,
+            "overall_entry_quality": 0,
+            "summary": "DataFrame vazio - nenhuma análise possível",
+        }
+    
+    current_price = float(df["close"].iloc[-1])
+    current_high = float(df["high"].iloc[-1])
+    current_low = float(df["low"].iloc[-1])
+    
+    # ===== TRIGGER 1: DISTÂNCIA À SUPPLY/DEMAND =====
+    distance_to_sd_pct = None
+    in_sd_zone = False
+    closest_sd_zone = None
+    sd_quality_score = 0
+    
+    zones = sd_payload.get("zones", [])
+    if zones:
+        for zone in zones:
+            zone_price = float(zone.get("price", 0))
+            zone_range = float(zone.get("range", 0))
+            
+            if zone_price <= 0 or zone_range <= 0:
+                continue
+                
+            zone_top = zone_price + zone_range / 2
+            zone_bottom = zone_price - zone_range / 2
+            
+            # Verificar se candle está dentro da SD
+            if zone_bottom <= current_price <= zone_top:
+                in_sd_zone = True
+                distance_to_sd_pct = 0.0
+                closest_sd_zone = zone
+                sd_quality_score = 100  # Perfect score
+                break
+            
+            # Calcular distância (não é imposição, só informação)
+            dist_to_zone = min(
+                abs(current_price - zone_top),
+                abs(current_price - zone_bottom)
+            )
+            pct_distance = (dist_to_zone / zone_price) * 100 if zone_price > 0 else 100
+            
+            # Manter a zona mais próxima
+            if distance_to_sd_pct is None or pct_distance < distance_to_sd_pct:
+                distance_to_sd_pct = pct_distance
+                closest_sd_zone = zone
+    
+    # Calcular SD quality score (não é obrigação ter 0.5%)
+    # 100 = dentro da SD
+    # 75 = ≤0.5% de distância
+    # 50 = ≤1% de distância
+    # 25 = ≤2% de distância
+    # 0 = >2% de distância
+    if in_sd_zone:
+        sd_quality_score = 100
+    elif distance_to_sd_pct is not None:
+        if distance_to_sd_pct <= 0.5:
+            sd_quality_score = 75
+        elif distance_to_sd_pct <= 1.0:
+            sd_quality_score = 50
+        elif distance_to_sd_pct <= 2.0:
+            sd_quality_score = 25
+        else:
+            sd_quality_score = 0
+    
+    # ===== TRIGGER 2: CONFLUÊNCIA COM OUTROS FATORES =====
+    # Usar outros sinais do sd_payload se disponíveis
+    confluences = sd_payload.get("confluences", [])
+    confluence_count = len(confluences) if confluences else 0
+    confluence_score = min(100, confluence_count * 20)  # Múltiplas confluências aumentam score
+    
+    # ===== SCORE FINAL DE QUALIDADE DE ENTRADA =====
+    # Combina:
+    # - 50% SD proximity
+    # - 30% Confluências
+    # - 20% Regime (se em trends/manipulation tem menos risco)
+    overall_entry_quality = int(
+        (sd_quality_score * 0.5) +
+        (confluence_score * 0.3) +
+        (40 * 0.2)  # 40 por padrão (sem regime info aqui)
+    )
+    
+    summary = ""
+    if in_sd_zone:
+        summary = "✅ ÓTIMO: Candle DENTRO da Supply/Demand (máxima confiança)"
+    elif distance_to_sd_pct is not None:
+        if distance_to_sd_pct <= 0.5:
+            summary = f"🟢 BOM: Apenas {distance_to_sd_pct:.3f}% de distância da SD (muito próximo)"
+        elif distance_to_sd_pct <= 1.0:
+            summary = f"🟡 MEDIANO: {distance_to_sd_pct:.3f}% de distância da SD (aceitável)"
+        elif distance_to_sd_pct <= 2.0:
+            summary = f"🟠 FRACO: {distance_to_sd_pct:.3f}% de distância da SD (longe)"
+        else:
+            summary = f"🔴 RUIM: {distance_to_sd_pct:.3f}% de distância da SD (muito longe)"
+    else:
+        summary = "❓ SEM DADOS: Nenhuma SD zone encontrada"
+    
+    if confluence_count > 0:
+        summary += f" | {confluence_count} confluências extras"
+    
+    return {
+        "distance_to_sd_pct": round(distance_to_sd_pct, 4) if distance_to_sd_pct is not None else None,
+        "in_sd_zone": bool(in_sd_zone),
+        "sd_quality_score": int(sd_quality_score),  # 0-100
+        "confluence_count": confluence_count,
+        "confluence_score": int(confluence_score),  # 0-100
+        "overall_entry_quality": overall_entry_quality,  # 0-100
+        "closest_sd_zone": closest_sd_zone,
+        "summary": summary,
+        "recommendation": (
+            "FORTE" if overall_entry_quality >= 75
+            else "MÉDIA" if overall_entry_quality >= 50
+            else "FRACA" if overall_entry_quality >= 25
+            else "EVITAR"
+        ),
+    }
+
+
 def _estimate_strategy_chances(
     spot: float,
     expected_move: float,
@@ -581,6 +726,9 @@ def build_context(
     smc_signals = detect_smc_signals(enriched_df)
     sweeps = detect_sweeps(enriched_df)
     sd_payload = evaluate_sd_confluence(enriched_df)
+    
+    # Avaliar triggers FLEXÍVEIS (não é imposição)
+    trigger_evaluation = _evaluate_trigger_conditions(enriched_df, sd_payload)
 
     if prefer_external_features:
         ext_sd = _get_external_value(enriched_df, EXTERNAL_SD_COLS)
@@ -655,6 +803,7 @@ def build_context(
         "next_sweeps": next_sweeps,
         "sd_payload": sd_payload,
         "sd_confluence": float(sd_payload.get("score", 0.0)),
+        "trigger_evaluation": trigger_evaluation,  # Avaliação FLEXÍVEL de entrada
     }
 
 
@@ -790,6 +939,47 @@ def _print_rich_summary(result: dict) -> None:
     print(f"\nRegime atual: {context['regime']}")
     print(f"\nFlow atual: {context['flow']}")
     print(f"\nModo de estrategia: {context.get('strategy_mode', DEFAULT_STRATEGY_MODE)}")
+
+    # ===== TRIGGER EVALUATION =====
+    trigger_eval = context.get("trigger_evaluation", {})
+    if trigger_eval:
+        print("\n" + "=" * 60)
+        print("AVALIAÇÃO DE TRIGGERS (FLEXÍVEL - Não é imposição)")
+        print("=" * 60)
+        
+        overall_quality = trigger_eval.get("overall_entry_quality", 0)
+        recommendation = trigger_eval.get("recommendation", "DESCONHECIDO")
+        
+        # Barra de qualidade visual
+        filled = int(overall_quality / 10)
+        bar = "█" * filled + "░" * (10 - filled)
+        
+        print(f"\n📊 QUALIDADE GERAL DA ENTRADA: {bar} {overall_quality}%")
+        print(f"   Recomendação: {recommendation}")
+        
+        # Detalhes de cada componente
+        sd_score = trigger_eval.get("sd_quality_score", 0)
+        conf_score = trigger_eval.get("confluence_score", 0)
+        distance_pct = trigger_eval.get("distance_to_sd_pct")
+        
+        print(f"\n   • Supply/Demand Score: {sd_score}%", end="")
+        if distance_pct is not None:
+            print(f" (Distância: {distance_pct:.4f}%)")
+        else:
+            print(" (Nenhuma SD zone)")
+        
+        print(f"   • Confluências Score: {conf_score}%", end="")
+        conf_count = trigger_eval.get("confluence_count", 0)
+        if conf_count > 0:
+            print(f" ({conf_count} confluência(s))")
+        else:
+            print()
+        
+        print(f"\n   Summary: {trigger_eval.get('summary', 'Sem informação')}")
+        
+        in_sd = trigger_eval.get("in_sd_zone", False)
+        if in_sd:
+            print("\n   ✅ ÓTIMO: Candle dentro da SD zone!")
 
     print("\n" + "=" * 60)
     print("SWEEPS")
