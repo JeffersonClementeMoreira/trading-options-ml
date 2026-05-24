@@ -5,7 +5,7 @@ string filename = "features_mt5.csv";
 datetime last_bar = 0;
 bool header_written = false;
 
-double MAValue(int period, int method, int applied_price, int shift)
+double MAValue(int period, ENUM_MA_METHOD method, ENUM_APPLIED_PRICE applied_price, int shift)
 {
    int handle = iMA(_Symbol, _Period, period, 0, method, applied_price);
    if(handle == INVALID_HANDLE) return 0;
