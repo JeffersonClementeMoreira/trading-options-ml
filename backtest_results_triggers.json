@@ -1,0 +1,20 @@
+{
+  "timestamp": "2026-05-24T08:49:26.708252",
+  "triggers": {
+    "name": "TRIGGERS FLEX\u00cdVEIS",
+    "total": 84319,
+    "wins": 84315,
+    "losses": 4,
+    "win_rate": 100.0,
+    "avg_move_pts": 37.15
+  },
+  "fixed_time": {
+    "name": "HOR\u00c1RIO FIXO 20:00",
+    "total": 878,
+    "wins": 878,
+    "losses": 0,
+    "win_rate": 100.0,
+    "avg_move_pts": 37.25
+  },
+  "improvement_pct": 0.0
+}
