@@ -1,0 +1,22 @@
+{
+  "symbol": "EURUSD",
+  "timeframe": "M15",
+  "datetime": "2026.05.21 02:00:00",
+  "open": 1.16259,
+  "high": 1.16281,
+  "low": 1.16248,
+  "close": 1.16249,
+  "mt5_er_mean": 0.0,
+  "mt5_kama_slope": 0.0,
+  "mt5_flow_score": 0.0,
+  "mt5_regime": "UNKNOWN",
+  "mt5_realized_vol": 0.0,
+  "mt5_expected_move": 0.0,
+  "mt5_atr_pct": 0.0,
+  "mt5_sweep_top": 0.0,
+  "mt5_sweep_bottom": 0.0,
+  "mt5_ret_1": 0.0,
+  "mt5_ret_3": 0.0,
+  "mt5_dist_mean": 0.0,
+  "received_utc": "2026-05-24T11:17:57.520051+00:00"
+}
