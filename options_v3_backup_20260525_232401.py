@@ -120,6 +120,57 @@ def _choose_csv_file(data_dir: Path, explicit_file: str | None) -> Path:
         raise ValueError("Indice de arquivo invalido") from exc
 
 
+def _save_prediction(prediction: dict, is_valid: bool) -> tuple[Path, Path]:
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    open_path = PATHS["predictions"] / "open" / f"prediction_{timestamp}.json"
+
+    with open_path.open("w", encoding="utf-8") as fp:
+        json.dump(prediction, fp, ensure_ascii=False, indent=2, default=str)
+
+    target_folder = "validated" if is_valid else "archive"
+    final_path = PATHS["predictions"] / target_folder / open_path.name
+
+    with final_path.open("w", encoding="utf-8") as fp:
+        json.dump(prediction, fp, ensure_ascii=False, indent=2, default=str)
+
+    return open_path, final_path
+
+
+def _save_evaluation_report(report: dict) -> Path:
+    reports_dir = PATHS["analytics"] / "reports"
+    reports_dir.mkdir(parents=True, exist_ok=True)
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    file_path = reports_dir / f"evaluation_{timestamp}.json"
+    with file_path.open("w", encoding="utf-8") as fp:
+        json.dump(report, fp, ensure_ascii=False, indent=2, default=str)
+
+    return file_path
+
+
+def _expected_move_multiplier(regime_label: str) -> float:
+    if regime_label in ("TREND_BULL", "TREND_BEAR"):
+        return 1.25
+    if regime_label == "MANIPULATION":
+        return 1.40
+    if regime_label == "RANGE":
+        return 0.85
+    return 1.0
+
+
+def _detect_next_sweeps(current_price: float, extremos: pd.DataFrame) -> dict:
+    if extremos.empty:
+        return {"next_top_sweep": None, "next_bottom_sweep": None}
+
+    acima = extremos[(extremos["type"] == "top") & (extremos["price"] > current_price)]
+    abaixo = extremos[(extremos["type"] == "bottom") & (extremos["price"] < current_price)]
+
+    next_top = float(acima.iloc[0]["price"]) if not acima.empty else None
+    next_bottom = float(abaixo.iloc[-1]["price"]) if not abaixo.empty else None
+
+    return {"next_top_sweep": next_top, "next_bottom_sweep": next_bottom}
+
+
 def _select_analysis_timestamp(df: pd.DataFrame, analysis_hour: int, analysis_minute: int) -> pd.Timestamp:
     if df.empty:
         raise ValueError("Sem dados para selecionar horario de analise")
@@ -160,6 +211,10 @@ def _extract_top3_strikes(option_strikes: list[dict]) -> tuple[list[dict], list[
     puts = sorted(puts, key=lambda row: float(row["strike"]), reverse=True)
 
     return calls[:3], puts[:3]
+
+
+def _std_norm_cdf(x: float) -> float:
+    return 0.5 * (1.0 + math.erf(x / math.sqrt(2.0)))
 
 
 def _evaluate_trigger_conditions(
