@@ -1,23 +1,29 @@
 #!/usr/bin/env python3
 """
-Master Script - Backtest Completo com Multi-Timeframe Confluence
+Master Script - Backtest Completo com Multi-Timeframe Confluence + Análise de Sweeps
 
 Roda tudo em uma vez:
 1. Backtest dia-a-dia
 2. Análise de resultados
-3. Gera relatório visual
+3. Detecção de sweeps em H4
+4. Validação em M15
+5. Gera relatório visual
 
 Uso:
-    python3 backtest_complete.py                 # Últimos 30 dias
-    python3 backtest_complete.py 60              # Últimos 60 dias
-    python3 backtest_complete.py --full          # Todos os dados
+    python3 backtest_complete.py                         # EURUSD, Últimos 30 dias
+    python3 backtest_complete.py --symbol EURUSD 60      # EURUSD, Últimos 60 dias
+    python3 backtest_complete.py --symbol EURUSD --full  # EURUSD, Todos os dados
+    python3 backtest_complete.py --start 2026-03-01 --end 2026-05-25  # Período específico
+    python3 backtest_complete.py --symbols               # Listar ativos disponíveis
 """
 
 import sys
 import argparse
 from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Optional
 import pandas as pd
+import glob
 
 # Adicionar path
 sys.path.insert(0, '/home/ubuntu/pessoal/options')
@@ -25,44 +31,112 @@ sys.path.insert(0, '/home/ubuntu/pessoal/options')
 from core.daily_backtester import DailyBacktester
 
 
+def get_available_symbols():
+    """Lista ativos disponíveis."""
+    data_dir = Path('/home/ubuntu/pessoal/options/dados')
+    files = data_dir.glob('*M15*processed.csv')
+    
+    symbols = []
+    for f in files:
+        # Extrair símbolo do nome: EURUSD_M15_...
+        parts = f.stem.split('_')
+        if parts[1] == 'M15':
+            symbols.append(parts[0])
+    
+    return sorted(set(symbols))
+
+
+def find_data_file(symbol: str) -> Optional[str]:
+    """Encontra arquivo de dados para o símbolo."""
+    data_dir = Path('/home/ubuntu/pessoal/options/dados')
+    pattern = f"{symbol}_M15*processed.csv"
+    files = list(data_dir.glob(pattern))
+    
+    if files:
+        return str(files[0])
+    return None
+
+
 def main():
     parser = argparse.ArgumentParser(
-        description='Backtest Completo com Multi-Timeframe Confluence',
+        description='Backtest Completo com Multi-Timeframe Confluence + Análise de Sweeps',
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-Exemplos:
-  python3 backtest_complete.py                 # Últimos 30 dias (padrão)
-  python3 backtest_complete.py 60              # Últimos 60 dias
-  python3 backtest_complete.py --full          # Todos os dados
+EXEMPLOS:
+
+  # Últimos 30 dias (padrão)
+  python3 backtest_complete.py
+
+  # EURUSD, últimos 60 dias
+  python3 backtest_complete.py 60
+
+  # EURUSD, período específico
   python3 backtest_complete.py --start 2026-03-01 --end 2026-05-25
+
+  # Todos os dados (3.5 anos)
+  python3 backtest_complete.py --full
+
+  # Listar ativos disponíveis
+  python3 backtest_complete.py --symbols
+
+ANÁLISE DE SWEEPS + CONFLUENCE:
+  A estratégia funcionará assim:
+  1. Detecta SWEEP em H4 (breakout de estrutura)
+  2. Valida M15 para confirmar movimento
+  3. Verifica se momentum está reduzindo (kamma, aceleração)
+  4. Combina com confluência para filtrar sinais
+  5. Salva tudo em CSV para análise manual
         """
     )
     parser.add_argument('days', nargs='?', type=int, default=30, help='Últimos N dias (padrão: 30)')
+    parser.add_argument('--symbol', type=str, default='EURUSD', help='Ativo (EURUSD, GBPUSD, etc)')
+    parser.add_argument('--symbols', action='store_true', help='Listar ativos disponíveis')
     parser.add_argument('--full', action='store_true', help='Usar todos os dados')
     parser.add_argument('--start', type=str, help='Data início (YYYY-MM-DD)')
     parser.add_argument('--end', type=str, help='Data fim (YYYY-MM-DD)')
     parser.add_argument('--output', type=str, default='backtest_results', help='Diretório output')
+    parser.add_argument('--detect-sweeps', action='store_true', help='Detectar sweeps em H4')
     
     args = parser.parse_args()
+    
+    # Listar ativos disponíveis
+    if args.symbols:
+        symbols = get_available_symbols()
+        print("\n📊 ATIVOS DISPONÍVEIS:\n")
+        for sym in symbols:
+            data_file = find_data_file(sym)
+            if data_file:
+                df = pd.read_csv(data_file)
+                print(f"   ✓ {sym:<10} ({len(df)} candles)")
+        print()
+        return 0
     
     print("\n" + "="*80)
     print("🚀 MULTI-TIMEFRAME CONFLUENCE - DAILY BACKTEST")
     print("="*80 + "\n")
     
-    # === Caminhos ===
-    data_path = '/home/ubuntu/pessoal/options/dados/EURUSD_M15_202301012200_202605222015_processed.csv'
-    model_path = '/home/ubuntu/pessoal/options/models/xgboost_model.pkl'
+    # === Encontrar arquivo de dados ===
+    print(f"🔍 Procurando dados para {args.symbol}...")
+    data_path = find_data_file(args.symbol)
     
-    # Verificar dados
-    if not Path(data_path).exists():
-        print(f"❌ Dados não encontrados: {data_path}")
+    if not data_path:
+        available = get_available_symbols()
+        print(f"❌ Nenhum arquivo encontrado para {args.symbol}")
+        print(f"\n📊 Ativos disponíveis: {', '.join(available)}")
+        print(f"\nUse: python3 backtest_complete.py --symbol {available[0] if available else 'EURUSD'}")
         return 1
+    
+    print(f"✅ Encontrado: {Path(data_path).name}")
+    
+    model_path = '/home/ubuntu/pessoal/options/models/xgboost_model.pkl'
     
     # Verificar modelo
     if not Path(model_path).exists():
-        print(f"⚠️ Modelo não encontrado: {model_path}")
+        print(f"⚠️ Modelo não encontrado")
         print("   Usando apenas análise técnica (M15 vs H4)...\n")
         model_path = None
+    else:
+        print(f"✅ Modelo XGBoost encontrado\n")
     
     # === Criar backtester ===
     print(f"📊 Carregando dados...")
@@ -86,7 +160,8 @@ Exemplos:
         start_date = (datetime.now() - timedelta(days=args.days)).strftime('%Y-%m-%d')
         period_desc = f"Últimos {args.days} dias"
     
-    print(f"📅 Período: {period_desc}\n")
+    print(f"📅 Período: {period_desc}")
+    print(f"   Ativo: {args.symbol}\n")
     
     # === RODAR BACKTEST ===
     print(f"\n{'='*80}")
