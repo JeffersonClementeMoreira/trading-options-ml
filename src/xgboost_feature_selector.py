@@ -272,7 +272,7 @@ def train_xgboost_selector(csv_file, symbol='GBPUSD'):
     
     # Salvar predictions
     output_df = df_signals[['datetime', 'signal', 'confluence', 'entry_price', 
-                            'exit_price', 'movement_pct', 'result', 'target', 
+                            'exit_price', 'exit_time', 'movement_pct', 'result', 'target', 
                             'win_probability']].copy()
     output_df['score_category'] = output_df['win_probability'].apply(
         lambda x: 'HIGH (>70%)' if x > 0.7 else ('MEDIUM (50-70%)' if x > 0.5 else 'LOW (<50%)')
@@ -304,6 +304,12 @@ def main():
     if eurusd_file.exists():
         print("\n\n")
         model_eu, importance_eu, output_eu = train_xgboost_selector(eurusd_file, 'EURUSD')
+    
+    # XAUUSD (Gold)
+    xauusd_file = base_dir / 'xauusd_signals_completo.csv'
+    if xauusd_file.exists():
+        print("\n\n")
+        model_xau, importance_xau, output_xau = train_xgboost_selector(xauusd_file, 'XAUUSD')
     
     print(f"\n{'='*100}")
     print(f"✅ TODOS OS MODELOS TREINADOS E SALVOS")

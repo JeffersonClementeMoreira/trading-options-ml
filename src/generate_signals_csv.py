@@ -268,6 +268,7 @@ def analyze_with_signals(file_path: Path, symbol: str, output_csv: Path) -> pd.D
 def main():
     """Main"""
     data_dir = Path('/home/ubuntu/pessoal/options/dados')
+    data_dir_alt = Path('/home/ubuntu/pessoal/options/data')
     output_dir = Path('/home/ubuntu/pessoal/options/backtest_results')
     output_dir.mkdir(parents=True, exist_ok=True)
     
@@ -286,6 +287,14 @@ def main():
     if eurusd_file.exists():
         print("\n" + "="*100)
         eurusd_df = analyze_with_signals(eurusd_file, 'EURUSD', eurusd_output)
+    
+    # XAUUSD (Gold)
+    xauusd_file = data_dir_alt / 'XAUUSD_M15_202001020600_202604131545.csv'
+    xauusd_output = output_dir / 'xauusd_signals_completo.csv'
+    
+    if xauusd_file.exists():
+        print("\n" + "="*100)
+        xauusd_df = analyze_with_signals(xauusd_file, 'XAUUSD', xauusd_output)
 
 
 if __name__ == '__main__':

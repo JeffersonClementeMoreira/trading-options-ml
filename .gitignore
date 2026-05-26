@@ -19,12 +19,11 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
-MANIFEST
 
 # Virtual environments
 venv/
-ENV/
 env/
+ENV/
 
 # IDE
 .vscode/
@@ -32,33 +31,25 @@ env/
 *.swp
 *.swo
 *~
+
+# Data & Results (Large files)
+dados/
+output/
+analytics/stats/
+backtest_results/
+*.csv
+*.json
+*.ndjson
+
+# OS
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 
-# Data files (too large)
-dados/*.csv
-!dados/*.README
-
-# Logs
-logs/
+# Temporary
+*.tmp
 *.log
-
-# Analytics & backtest outputs (regenerated)
-analytics/stats/*.csv
-analytics/stats/*.html
-backtests/
-
-# Predictions (temporary)
-predictions/
-
-# Models (large XGB files - save separately)
-*.pkl
-*.joblib
-*.model
-*.xgb
-*.json.model
-
-# Sensitive data
 .env
-*.key
-*.pem
-credentials.txt
