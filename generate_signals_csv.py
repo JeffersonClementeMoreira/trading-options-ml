@@ -109,64 +109,96 @@ def analyze_with_signals(file_path: Path, symbol: str, output_csv: Path) -> pd.D
     df['movement_pct'] = np.nan
     df['result'] = ''
     
-    forward_candles = 5
-    threshold = 0.01  # 1.0% movement
+    # Venda de opções expirando às 14:00 (pode ser mesmo dia ou próximo dia)
+    threshold = 0.002  # 20 pips (0.2%) - 10 pips target + 10 spread/comissão
     
-    for idx in range(len(df) - forward_candles):
+    for idx in range(len(df)):
         if df['signal'].iloc[idx] == 'HOLD':
             continue
+        
+        # Calcular tempo até expiração (14:00)
+        current_time = df['datetime'].iloc[idx]
+        
+        # Próxima expiração às 14:00
+        if current_time.time() < pd.Timestamp('14:00:00').time():
+            # Se antes de 14:00, expiração é hoje às 14:00
+            expiry_time = current_time.replace(hour=14, minute=0, second=0)
+        else:
+            # Se após 14:00, expiração é amanhã às 14:00
+            expiry_time = (current_time + pd.Timedelta(days=1)).replace(hour=14, minute=0, second=0)
+        
+        # Encontrar candles entre agora e expiração
+        future_mask = (df['datetime'] > current_time) & (df['datetime'] <= expiry_time)
+        if not future_mask.any():
+            # Nenhum dado até a expiração, usar últimos candles disponíveis
+            forward_candles = min(96, len(df) - idx - 1)  # ~24h em 15min candles
+        else:
+            forward_candles = future_mask.sum()
+        
+        if forward_candles <= 0:
+            continue
+        
+        future_slice = df.iloc[idx+1:idx+1+forward_candles]
         
         signal = df['signal'].iloc[idx]
         entry_price = df['close'].iloc[idx]
         
-        # Find exit in next 5 candles
-        future_slice = df.iloc[idx+1:idx+1+forward_candles]
+        if len(future_slice) == 0:
+            continue
         
         if signal == 'BUY (BULLISH)':
-            # Look for 1% up movement
+            # Look for threshold up movement
             max_high = future_slice['high'].max()
-            move_pct = (max_high - entry_price) / entry_price * 100
+            best_move_pct = (max_high - entry_price) / entry_price * 100
             
-            if move_pct >= threshold:
-                # Find first candle that reaches 1% up
+            if best_move_pct >= threshold * 100:  # Convert threshold from decimal to percent
+                # Find first candle that reaches target
                 for future_idx, row in future_slice.iterrows():
-                    if row['high'] >= entry_price * (1 + threshold/100):
-                        df.at[idx, 'exit_price'] = entry_price * (1 + threshold/100)
+                    if row['high'] >= entry_price * (1 + threshold):
+                        exit_px = entry_price * (1 + threshold)
+                        move_pct = (exit_px - entry_price) / entry_price * 100
+                        df.at[idx, 'exit_price'] = exit_px
                         df.at[idx, 'exit_time'] = str(row['datetime'])
                         df.at[idx, 'exit_idx'] = future_idx
-                        df.at[idx, 'movement_pct'] = round(move_pct, 2)
-                        df.at[idx, 'result'] = f'WIN ✅ (+{threshold}%)'
+                        df.at[idx, 'movement_pct'] = round(move_pct, 4)
+                        df.at[idx, 'result'] = f'WIN ✅ (+{move_pct:.2f}%)'
                         break
             else:
-                # No exit reached
-                df.at[idx, 'exit_price'] = future_slice['close'].iloc[-1]
+                # No target reached - calculate REAL movement achieved
+                exit_px = future_slice['close'].iloc[-1]
+                real_move_pct = (exit_px - entry_price) / entry_price * 100
+                df.at[idx, 'exit_price'] = exit_px
                 df.at[idx, 'exit_time'] = str(future_slice.iloc[-1]['datetime'])
                 df.at[idx, 'exit_idx'] = future_slice.index[-1]
-                df.at[idx, 'movement_pct'] = round(move_pct, 2)
-                df.at[idx, 'result'] = f'LOSS ❌ ({move_pct:.2f}%)'
+                df.at[idx, 'movement_pct'] = round(real_move_pct, 4)
+                df.at[idx, 'result'] = f'LOSS ❌ ({real_move_pct:.2f}%)'
         
         elif signal == 'SELL (BEARISH)':
-            # Look for 1% down movement
+            # Look for threshold down movement
             min_low = future_slice['low'].min()
-            move_pct = (entry_price - min_low) / entry_price * 100
+            best_move_pct = (entry_price - min_low) / entry_price * 100
             
-            if move_pct >= threshold:
-                # Find first candle that reaches 1% down
+            if best_move_pct >= threshold * 100:  # Convert threshold from decimal to percent
+                # Find first candle that reaches target
                 for future_idx, row in future_slice.iterrows():
-                    if row['low'] <= entry_price * (1 - threshold/100):
-                        df.at[idx, 'exit_price'] = entry_price * (1 - threshold/100)
+                    if row['low'] <= entry_price * (1 - threshold):
+                        exit_px = entry_price * (1 - threshold)
+                        move_pct = (entry_price - exit_px) / entry_price * 100
+                        df.at[idx, 'exit_price'] = exit_px
                         df.at[idx, 'exit_time'] = str(row['datetime'])
                         df.at[idx, 'exit_idx'] = future_idx
-                        df.at[idx, 'movement_pct'] = round(move_pct, 2)
-                        df.at[idx, 'result'] = f'WIN ✅ (+{threshold}%)'
+                        df.at[idx, 'movement_pct'] = round(move_pct, 4)
+                        df.at[idx, 'result'] = f'WIN ✅ (+{move_pct:.2f}%)'
                         break
             else:
-                # No exit reached
-                df.at[idx, 'exit_price'] = future_slice['close'].iloc[-1]
+                # No target reached - calculate REAL movement achieved
+                exit_px = future_slice['close'].iloc[-1]
+                real_move_pct = (entry_price - exit_px) / entry_price * 100
+                df.at[idx, 'exit_price'] = exit_px
                 df.at[idx, 'exit_time'] = str(future_slice.iloc[-1]['datetime'])
                 df.at[idx, 'exit_idx'] = future_slice.index[-1]
-                df.at[idx, 'movement_pct'] = round(move_pct, 2)
-                df.at[idx, 'result'] = f'LOSS ❌ ({move_pct:.2f}%)'
+                df.at[idx, 'movement_pct'] = round(real_move_pct, 4)
+                df.at[idx, 'result'] = f'LOSS ❌ ({-real_move_pct:.2f}%)'
         
         df.at[idx, 'entry_price'] = entry_price
     
