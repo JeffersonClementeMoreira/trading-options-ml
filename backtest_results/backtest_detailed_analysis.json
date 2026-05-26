@@ -1,0 +1,38 @@
+[
+  {
+    "symbol": "EURUSD",
+    "data_points": 84434,
+    "period": "2023-01-01 to 2026-05-22",
+    "price_stats": {
+      "min": 1.01773,
+      "max": 1.20817,
+      "current": 1.16036,
+      "atr_mean": 0.058524332614823406
+    },
+    "smc_events": {
+      "bullish_touches": 5077,
+      "bearish_touches": 5464,
+      "total_events": 10541,
+      "events_pct": 12.484307269583343
+    },
+    "high_confluence": 7393
+  },
+  {
+    "symbol": "GBPUSD",
+    "data_points": 5760,
+    "period": "2026-01-01 to 2026-03-01",
+    "price_stats": {
+      "min": 1.24523,
+      "max": 1.33605,
+      "current": 1.33,
+      "atr_mean": 0.14262696180555556
+    },
+    "smc_events": {
+      "bullish_touches": 477,
+      "bearish_touches": 559,
+      "total_events": 1036,
+      "events_pct": 17.98611111111111
+    },
+    "high_confluence": 720
+  }
+]
