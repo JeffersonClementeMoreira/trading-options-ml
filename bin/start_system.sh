@@ -1,60 +1,85 @@
 #!/bin/bash
 
-echo "╔════════════════════════════════════════════════════════════════════════════╗"
-echo "║                 🚀 INICIAR SISTEMA - DADOS REAIS DO MT5 🚀               ║"
-echo "╚════════════════════════════════════════════════════════════════════════════╝"
+echo "=========================================================================="
+echo "              START SYSTEM - REAL MT5 DATA              "
+echo "=========================================================================="
 echo ""
 
 cd /home/ubuntu/pessoal/options/src
 
-echo "🧹 Parando processos antigos..."
+echo "Stopping old processes..."
 pkill -9 -f "server_mt5_http" 2>/dev/null
 pkill -9 -f "monitor_mt5_real" 2>/dev/null
 sleep 2
-echo "✅ Limpo"
+echo "[OK] Cleaned"
 echo ""
 
-echo "📊 Removendo logs antigos..."
+echo "Removing old logs..."
 rm -f /tmp/server_real.log /tmp/monitor_real.log
-echo "✅ Limpo"
+echo "[OK] Cleaned"
 echo ""
 
-echo "🚀 INICIANDO SISTEMA:"
+echo "STARTING SYSTEM:"
 echo ""
 
-echo "  1️⃣  Servidor HTTP (port 8765)..."
+echo "[1] HTTP Server (port 8765)..."
 python3 server_mt5_http.py > /tmp/server_real.log 2>&1 &
 SERVER_PID=$!
 sleep 2
-echo "     ✅ PID: $SERVER_PID"
+echo "    [OK] PID: $SERVER_PID"
 echo ""
 
-echo "  2️⃣  Monitor WebSocket..."
+echo "[2] WebSocket Monitor..."
 python3 monitor_mt5_real.py > /tmp/monitor_real.log 2>&1 &
 MONITOR_PID=$!
 sleep 2
-echo "     ✅ PID: $MONITOR_PID"
+echo "    [OK] PID: $MONITOR_PID"
 echo ""
 
-echo "═════════════════════════════════════════════════════════════════════════════"
-echo "✅ SISTEMA PRONTO!"
-echo "═════════════════════════════════════════════════════════════════════════════"
+echo "=========================================================================="
+echo "[OK] SYSTEM READY!"
+echo "=========================================================================="
 echo ""
-echo "📝 Processos rodando:"
-echo "   • server_mt5_http.py (PID $SERVER_PID)"
-echo "   • monitor_mt5_real.py (PID $MONITOR_PID)"
+echo "Running processes:"
+echo "   * server_mt5_http.py (PID $SERVER_PID)"
+echo "   * monitor_mt5_real.py (PID $MONITOR_PID)"
 echo ""
-echo "📊 Para monitorar em tempo real:"
+echo "Monitor in real-time:"
 echo ""
-echo "   SERVIDOR:"
+echo "   SERVER LOG:"
 echo "   tail -f /tmp/server_real.log"
 echo ""
-echo "   MONITOR:"
+echo "   MONITOR LOG:"
 echo "   tail -f /tmp/monitor_real.log"
 echo ""
-echo "═════════════════════════════════════════════════════════════════════════════"
-echo "⏳ Aguardando primeiro candle real M15 do MT5..."
+echo "=========================================================================="
+echo "Waiting for first real M15 candle from MT5..."
+echo ""
+echo "TIP: Run 'tail -f /tmp/server_real.log' in another terminal to monitor"
+echo "     real-time data from MT5."
+echo ""
+echo "=========================================================================="
 echo ""
 
-# Manter vivo
-wait
+# Monitor processes and restart if they crash
+while true; do
+    # Check if server is running
+    if ! ps -p $SERVER_PID > /dev/null 2>&1; then
+        echo "[WARNING] Server died at $(date '+%Y-%m-%d %H:%M:%S'), restarting..."
+        python3 server_mt5_http.py > /tmp/server_real.log 2>&1 &
+        SERVER_PID=$!
+        echo "[OK] Server restarted (PID $SERVER_PID)"
+        sleep 2
+    fi
+    
+    # Check if monitor is running
+    if ! ps -p $MONITOR_PID > /dev/null 2>&1; then
+        echo "[WARNING] Monitor died at $(date '+%Y-%m-%d %H:%M:%S'), restarting..."
+        python3 monitor_mt5_real.py > /tmp/monitor_real.log 2>&1 &
+        MONITOR_PID=$!
+        echo "[OK] Monitor restarted (PID $MONITOR_PID)"
+        sleep 2
+    fi
+    
+    sleep 10
+done
