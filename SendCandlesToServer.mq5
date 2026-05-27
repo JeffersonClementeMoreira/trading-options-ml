@@ -8,17 +8,17 @@ input string ServerURL = "http://127.0.0.1:8765/mt5/candle";
 input int IntervalMs = 15000;
 
 //+------------------------------------------------------------------+
-// Enviar candle
+// Enviar candle (índice 0=atual, 1=último fechado, 2=anterior)
 //+------------------------------------------------------------------+
-void SendCandle(string symbol_mt5, string symbol_api)
+void SendCandle(string symbol_mt5, string symbol_api, int index = 0)
 {
     // Ler OHLC da corretora (usa símbolo da corretora: EURUSD, GBPUSD, GOLD)
-    double o = iOpen(symbol_mt5, PERIOD_M15, 0);
-    double h = iHigh(symbol_mt5, PERIOD_M15, 0);
-    double l = iLow(symbol_mt5, PERIOD_M15, 0);
-    double c = iClose(symbol_mt5, PERIOD_M15, 0);
-    long v = iVolume(symbol_mt5, PERIOD_M15, 0);
-    datetime time_bar = iTime(symbol_mt5, PERIOD_M15, 0);
+    double o = iOpen(symbol_mt5, PERIOD_M15, index);
+    double h = iHigh(symbol_mt5, PERIOD_M15, index);
+    double l = iLow(symbol_mt5, PERIOD_M15, index);
+    double c = iClose(symbol_mt5, PERIOD_M15, index);
+    long v = iVolume(symbol_mt5, PERIOD_M15, index);
+    datetime time_bar = iTime(symbol_mt5, PERIOD_M15, index);
     
     // String datetime em ISO 8601 (YYYY-MM-DDTHH:MM:SS)
     MqlDateTime dt;
@@ -61,18 +61,62 @@ void SendCandle(string symbol_mt5, string symbol_api)
 //+------------------------------------------------------------------+
 void OnStart()
 {
-    Print("Start - sending to ", ServerURL);
+    Print("═══════════════════════════════════════════════════════════");
+    Print("SendCandlesToServer.mq5 INICIADO");
+    Print("Enviando para: ", ServerURL);
+    Print("═══════════════════════════════════════════════════════════");
     
+    // Rastrear últimos datetimes para detectar novos candles
+    datetime last_time_eur = iTime("EURUSD", PERIOD_M15, 0);
+    datetime last_time_gbp = iTime("GBPUSD", PERIOD_M15, 0);
+    datetime last_time_xau = iTime("GOLD", PERIOD_M15, 0);
+    
+    Print("✓ Enviando ÚLTIMO CANDLE FECHADO inicial...");
+    Print("");
+    
+    // Enviar último candle fechado (index=1) ao iniciar
+    SendCandle("EURUSD", "EURUSD", 1);
+    Sleep(500);
+    SendCandle("GBPUSD", "GBPUSD", 1);
+    Sleep(500);
+    SendCandle("GOLD", "XAUUSD", 1);
+    Sleep(500);
+    
+    Print("");
+    Print("✓ Iniciando monitoramento de NOVOS candles...");
+    Print("  (próximas 15 min, novo candle será enviado automaticamente)");
+    Print("");
+    
+    // Agora monitorar novos candles
     while(true)
     {
-        SendCandle("EURUSD", "EURUSD");
-        Sleep(500);
+        datetime current_time_eur = iTime("EURUSD", PERIOD_M15, 0);
+        datetime current_time_gbp = iTime("GBPUSD", PERIOD_M15, 0);
+        datetime current_time_xau = iTime("GOLD", PERIOD_M15, 0);
         
-        SendCandle("GBPUSD", "GBPUSD");
-        Sleep(500);
+        // EURUSD: novo candle?
+        if(current_time_eur != last_time_eur)
+        {
+            SendCandle("EURUSD", "EURUSD", 1);  // Enviar candle que acabou de fechar
+            last_time_eur = current_time_eur;
+            Sleep(500);
+        }
         
-        SendCandle("GOLD", "XAUUSD");  // Corretora: GOLD | API: XAUUSD
-        Sleep(500);
+        // GBPUSD: novo candle?
+        if(current_time_gbp != last_time_gbp)
+        {
+            SendCandle("GBPUSD", "GBPUSD", 1);
+            last_time_gbp = current_time_gbp;
+            Sleep(500);
+        }
+        
+        // GOLD/XAUUSD: novo candle?
+        if(current_time_xau != last_time_xau)
+        {
+            SendCandle("GOLD", "XAUUSD", 1);
+            last_time_xau = current_time_xau;
+            Sleep(500);
+        }
         
         Sleep(IntervalMs);
     }
