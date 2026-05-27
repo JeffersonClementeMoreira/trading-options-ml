@@ -1,5 +1,0 @@
-date,day_of_week,m15_trend,h4_trend,is_aligned,alignment_score,final_pred,final_prob,result,change_pct,was_correct
-2026-05-18,Monday,NEUTRAL,NEUTRAL,❌,50%,UP,80.0%,DOWN,-0.41%,❌
-2026-05-19,Tuesday,NEUTRAL,NEUTRAL,❌,50%,DOWN,80.0%,UP,0.15%,❌
-2026-05-20,Wednesday,NEUTRAL,NEUTRAL,❌,50%,UP,80.0%,DOWN,-0.06%,❌
-2026-05-21,Thursday,NEUTRAL,NEUTRAL,❌,50%,DOWN,55.0%,DOWN,-0.12%,✅

@@ -1,7 +1,0 @@
-date,day_of_week,xgb_pred,xgb_prob,m15_trend,h4_trend,is_aligned,alignment_score,confidence_adjustment,final_pred,final_prob,result,change_pct,was_correct,current_close,next_close,reasoning
-2026-05-15,Friday,DOWN,80.0%,NEUTRAL,NEUTRAL,❌,50%,-10%,DOWN,80.0%,NO_DATA,N/A,WAIT,1.16234,N/A,XGBoost DOWN mas tendência neutra
-2026-05-18,Monday,UP,80.0%,NEUTRAL,NEUTRAL,❌,50%,-10%,UP,80.0%,DOWN,-0.41%,❌,1.16544,1.16065,XGBoost UP mas tendência neutra
-2026-05-19,Tuesday,DOWN,80.0%,NEUTRAL,NEUTRAL,❌,50%,-10%,DOWN,80.0%,UP,0.15%,❌,1.16065,1.16244,XGBoost DOWN mas tendência neutra
-2026-05-20,Wednesday,UP,80.0%,NEUTRAL,NEUTRAL,❌,50%,-10%,UP,80.0%,DOWN,-0.06%,❌,1.16244,1.16175,XGBoost UP mas tendência neutra
-2026-05-21,Thursday,DOWN,55.0%,NEUTRAL,NEUTRAL,❌,50%,-10%,DOWN,55.0%,DOWN,-0.12%,✅,1.16175,1.16036,XGBoost DOWN mas tendência neutra
-2026-05-22,Friday,DOWN,80.0%,NEUTRAL,NEUTRAL,❌,50%,-10%,DOWN,80.0%,NO_DATA,N/A,WAIT,1.16036,N/A,XGBoost DOWN mas tendência neutra
