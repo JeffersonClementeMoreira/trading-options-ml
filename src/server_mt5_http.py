@@ -302,8 +302,8 @@ class MT5HTTPServer:
     
     async def start_websocket(self):
         """Iniciar servidor WebSocket"""
-        async with serve(self.ws_handler, "localhost", 9001):
-            print("🚀 WebSocket servidor em ws://localhost:9001")
+        async with serve(self.ws_handler, "0.0.0.0", 9001):
+            print("🚀 WebSocket servidor em ws://0.0.0.0:9001")
             
             # Task para processar fila
             asyncio.create_task(self.process_queue())
@@ -343,7 +343,19 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
         try:
             content_length = int(self.headers.get('Content-Length', 0))
             body = self.rfile.read(content_length)
-            data = json.loads(body.decode('utf-8'))
+            
+            # Remove null terminators that MQL5 might add
+            body = body.rstrip(b'\x00').strip()
+            
+            # Parse JSON (with error handling)
+            try:
+                data = json.loads(body.decode('utf-8', errors='ignore'))
+            except json.JSONDecodeError as e:
+                print(f"[ERROR] JSON decode failed: {e}")
+                print(f"[ERROR] Body: {body}")
+                self.send_response(400)
+                self.end_headers()
+                return
             
             # Processar dados
             if self.server_instance.process_mt5_data(data):
@@ -352,11 +364,14 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
                 self.end_headers()
                 self.wfile.write(json.dumps({'ok': True}).encode())
             else:
+                print(f"[ERROR] process_mt5_data returned False for {data.get('symbol')}")
                 self.send_response(400)
                 self.end_headers()
         
         except Exception as e:
             print(f"❌ Erro HTTP: {e}")
+            import traceback
+            traceback.print_exc()
             self.send_response(500)
             self.end_headers()
     
@@ -368,8 +383,10 @@ class HTTPRequestHandler(BaseHTTPRequestHandler):
 def run_http_server(server_instance, port=8765):
     """Rodar servidor HTTP em thread separada"""
     HTTPRequestHandler.server_instance = server_instance
-    http_server = ThreadingHTTPServer(('localhost', port), HTTPRequestHandler)
-    print(f"🌐 HTTP servidor em http://localhost:{port}/mt5/candle")
+    http_server = ThreadingHTTPServer(('0.0.0.0', port), HTTPRequestHandler)
+    http_server.allow_reuse_address = True
+    http_server.socket.setsockopt(1, 15, 1)  # SO_REUSEADDR
+    print(f"🌐 HTTP servidor em http://0.0.0.0:{port}/mt5/candle")
     http_server.serve_forever()
 
 

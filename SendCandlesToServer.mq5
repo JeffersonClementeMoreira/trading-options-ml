@@ -44,6 +44,9 @@ void SendCandle(string symbol_mt5, string symbol_api, int index = 0)
     
     StringToCharArray(json, data);
     
+    // Remove null terminator that StringToCharArray adds
+    ArrayResize(data, ArraySize(data) - 1);
+    
     string headers = "Content-Type: application/json";
     
     int res = WebRequest("POST", ServerURL, headers, 5000, data, result, result_headers);
