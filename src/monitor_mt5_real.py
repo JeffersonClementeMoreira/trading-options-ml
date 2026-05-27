@@ -82,8 +82,10 @@ class XGBoostInference:
     def predict(self, symbol, features):
         """Fazer predição com XGBoost"""
         if self.models[symbol] is None:
-            # Mock: retornar score aleatório
-            return np.random.uniform(0, 1)
+            # ERRO: Modelo não carregado - NÃO inventar dados!
+            print(f"❌ ERRO CRÍTICO: Modelo XGBoost para {symbol} não disponível!")
+            print(f"   Arquivo esperado: /home/ubuntu/pessoal/options/src/xgboost_{symbol}.pkl")
+            return None
         
         try:
             # Preparar features para o modelo
@@ -91,8 +93,9 @@ class XGBoostInference:
             score = self.models[symbol].predict_proba(X)[0][1]
             return float(score)
         except Exception as e:
-            print(f"⚠️  Erro ao prever {symbol}: {e}")
-            return np.random.uniform(0, 1)
+            print(f"❌ ERRO ao prever {symbol}: {e}")
+            print(f"   Não inventar dados aleatórios!")
+            return None
 
 
 class MonitorMT5:
@@ -138,6 +141,11 @@ class MonitorMT5:
         
         # Predição XGBoost
         score = self.xgboost.predict(symbol, features)
+        
+        # Se score é None, modelo não está disponível - NÃO ENVIAR
+        if score is None:
+            print(f"❌ Modelo XGBoost para {symbol} não disponível. Pulando.")
+            return None
         
         # Categorizar score
         if score > 0.7:
@@ -219,6 +227,10 @@ Ação: <b>{action_emoji} {action_text}</b>
         
         # Formatar mensagem
         message = self.format_message(candle)
+        
+        # Se mensagem é None (modelo não disponível), não enviar
+        if message is None:
+            return False
         
         # Enviar para Telegram
         success, error = self.telegram.send_message(message)
