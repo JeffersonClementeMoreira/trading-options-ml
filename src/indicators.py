@@ -124,6 +124,53 @@ def calculate_fvg(df, threshold=0.0001):
     
     return fvg_type
 
+def calculate_kaufman_efficiency_ratio(df, period=20):
+    """
+    Calcula Kaufman Efficiency Ratio (ER)
+    Mede o quanto uma sequência de preços é eficiente em relação à sua volatilidade
+    ER alta = trend forte | ER baixa = range
+    """
+    direction = (df['close'] - df['close'].shift(period)).abs()
+    volatility = (df['close'] - df['close'].shift(1)).abs().rolling(period).sum()
+    er = direction / volatility.clip(lower=1e-6)
+    return er.fillna(0.0)
+
+def calculate_kama(df, period_er=10, fast=2, slow=30):
+    """
+    Calcula KAMA (Kaufman's Adaptive Moving Average)
+    MA adaptativa que se ajusta à eficiência do trend
+    """
+    close = df['close']
+    er = calculate_kaufman_efficiency_ratio(df, period=period_er)
+    
+    fast_sc = 2 / (fast + 1)
+    slow_sc = 2 / (slow + 1)
+    sc = (er * (fast_sc - slow_sc) + slow_sc) ** 2
+    
+    kama_values = np.zeros(len(close))
+    kama_values[0] = close.iloc[0]
+    
+    for i in range(1, len(close)):
+        kama_values[i] = kama_values[i - 1] + sc.iloc[i] * (close.iloc[i] - kama_values[i - 1])
+    
+    return pd.Series(kama_values, index=df.index)
+
+def calculate_realized_volatility(df, bars_per_day=96, days_per_year=252):
+    """
+    Calcula Realized Volatility (volatilidade realizada)
+    Volatilidade observada dos retornos recentes
+    """
+    returns = df['close'].pct_change()
+    realized_vol = (returns.rolling(bars_per_day).std() * np.sqrt(bars_per_day * days_per_year))
+    
+    # Também considera ATR como componente
+    if 'atr' in df.columns:
+        atr_pct = df['atr'] / df['close'].clip(lower=1e-6)
+        atr_vol = atr_pct.rolling(bars_per_day).mean() * np.sqrt(days_per_year)
+        realized_vol = np.maximum(realized_vol, atr_vol)
+    
+    return realized_vol.fillna(0.0)
+
 def calculate_all_indicators(df):
     """
     Calcula TODOS os indicadores de uma vez
@@ -140,6 +187,11 @@ def calculate_all_indicators(df):
     df['macd'] = calculate_macd(df)
     df['atr'] = calculate_atr(df, period=14)
     df['momentum'] = calculate_momentum(df, period=14)
+    
+    # Indicadores avançados (do backup)
+    df['er'] = calculate_kaufman_efficiency_ratio(df, period=20)
+    df['kama'] = calculate_kama(df, period_er=10, fast=2, slow=30)
+    df['realized_vol'] = calculate_realized_volatility(df, bars_per_day=96, days_per_year=252)
     
     # Novo: Standard Deviation
     df['sd'] = calculate_sd(df, window=20)
@@ -173,6 +225,7 @@ def get_indicator_names():
     """Retorna lista de todos os indicadores calculados"""
     continuous = [
         'rsi', 'sma20', 'sma50', 'ema12', 'ema26', 'macd', 'atr', 'momentum',
+        'er', 'kama', 'realized_vol',  # Novos do backup
         'sd', 'bb_upper', 'bb_lower', 'bb_width',
         'smc_support', 'smc_resistance'
     ]
@@ -196,6 +249,7 @@ def get_model_features():
     # Evita multicolinearidade e mantém features significativas
     return [
         'rsi', 'sma20', 'sma50', 'macd', 'atr', 'momentum',
+        'er', 'kama', 'realized_vol',  # Novos do backup
         'sd', 'bb_width',
         'smc_support', 'smc_resistance',
         'price_above_sma20', 'price_above_sma50',

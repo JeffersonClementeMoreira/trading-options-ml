@@ -2,6 +2,7 @@
 """
 BACKTEST CHRONOLOGICAL - Mantém ordem cronológica, treina 70% inicial, prediz 30% final
 Usa módulo indicators.py para cálculo de indicadores técnicos
+ENHANCED: Decision Tree Refiner para melhorar acerto de direção
 """
 
 import pandas as pd
@@ -13,8 +14,9 @@ from sklearn.metrics import mean_absolute_error, r2_score
 import warnings
 warnings.filterwarnings('ignore')
 
-# Importar módulo de indicadores
+# Importar módulos
 from indicators import calculate_all_indicators, get_model_features
+from decision_tree_refiner import DirectionRefinementTree, build_direction_features
 
 def load_and_process_data(csv_file, symbol):
     """Carrega dados e calcula indicadores"""
@@ -198,6 +200,77 @@ def predict_on_test(df_test, xgb_model, rf_model, scaler, feature_names, symbol)
         'actual_pips': actual_pips,
         'error_pips': error_pips
     }
+
+def refine_predictions_with_decision_tree(df_test, predictions):
+    """
+    Refina predições de direção usando Decision Tree.
+    
+    XGBoost/RF prediz preço → Árvore refina DIREÇÃO com indicadores técnicos
+    """
+    print(f"\n{'─'*80}")
+    print(f"🌳 Refinando predições com Árvore de Decisão")
+    print(f"{'─'*80}")
+    
+    try:
+        # Criar refiner
+        tree_refiner = DirectionRefinementTree(max_depth=7, min_samples_leaf=50)
+        
+        # Labels: direção real (1 = up, 0 = down)
+        direction_labels = (df_test['target_price'] > df_test['close']).astype(int)
+        
+        # Confiança do ensemble (usar como feature)
+        confidence_scores = predictions['confidence']
+        
+        # Treinar árvore
+        print(f"\n   Treinando árvore com {len(df_test)} samples...")
+        importance = tree_refiner.train(df_test, direction_labels, confidence_scores)
+        
+        # Refinar predições
+        refined_directions, refinement_scores = tree_refiner.predict_refined_direction(
+            df_test,
+            predictions['pred_ensemble'],
+            confidence_scores
+        )
+        
+        # Calcular direção bruta do ensemble
+        ensemble_direction = (predictions['pred_ensemble'] > df_test['close'].values).astype(int)
+        
+        # Contar mudanças
+        changes = (refined_directions != ensemble_direction).sum()
+        
+        print(f"   ✅ Árvore refinada!")
+        print(f"   📊 Direções alteradas: {changes}/{len(refined_directions)} ({changes/len(refined_directions)*100:.1f}%)")
+        
+        # Calcular novo win rate com direções refinadas
+        refined_pips = np.where(
+            refined_directions == 1,
+            predictions['actual_pips'],
+            -predictions['actual_pips']
+        )
+        refined_wins = (refined_pips > 0).sum()
+        refined_win_rate = refined_wins / len(refined_directions) * 100
+        
+        print(f"   📈 Win rate refinado: {refined_wins}/{len(refined_directions)} = {refined_win_rate:.2f}%")
+        
+        original_wins = (predictions['actual_pips'] > 0).sum()
+        improvement = refined_win_rate - (original_wins / len(refined_directions) * 100)
+        print(f"   ⬆️  Melhoria: {improvement:+.2f}%")
+        
+        return {
+            'refined_directions': refined_directions,
+            'refinement_scores': refinement_scores,
+            'tree_refiner': tree_refiner,
+            'importance': importance
+        }
+    
+    except Exception as e:
+        print(f"   ⚠️  Erro ao refinar: {e}")
+        return {
+            'refined_directions': (predictions['pred_ensemble'] > df_test['close'].values).astype(int),
+            'refinement_scores': predictions['confidence'],
+            'tree_refiner': None,
+            'importance': pd.DataFrame()
+        }
 
 def calculate_confluence_score(df, window=5):
     """Calcula confluence score (0-5) para cada linha usando histórico de predições"""
@@ -398,6 +471,13 @@ def main():
     
     xgb_eurusd, rf_eurusd, scaler_eurusd, features = train_models(df_eurusd_train)
     pred_eurusd = predict_on_test(df_eurusd_test, xgb_eurusd, rf_eurusd, scaler_eurusd, features, 'EURUSD')
+    
+    # ========================================================================
+    # 🌳 REFINAR COM DECISION TREE
+    # ========================================================================
+    refinement_eurusd = refine_predictions_with_decision_tree(df_eurusd_test, pred_eurusd)
+    pred_eurusd['refined_directions'] = refinement_eurusd['refined_directions']
+    pred_eurusd['refinement_scores'] = refinement_eurusd['refinement_scores']
     
     # Manter índices de treino para criar output completo
     train_indices_eurusd = np.arange(split_idx)
