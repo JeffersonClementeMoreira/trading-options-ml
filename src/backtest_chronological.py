@@ -199,6 +199,79 @@ def predict_on_test(df_test, xgb_model, rf_model, scaler, feature_names, symbol)
         'error_pips': error_pips
     }
 
+def calculate_confluence_score(df, window=5):
+    """Calcula confluence score (0-5) para cada linha usando histórico de predições"""
+    confluence_scores = []
+    
+    for i in range(len(df)):
+        if i < window - 1 or pd.isna(df.iloc[i]['predicted_pips_ensemble']):
+            confluence_scores.append(0)
+        else:
+            # Ver últimos N candles (inclusive este)
+            window_start = i - window + 1
+            window_end = i + 1
+            window_data = df.iloc[window_start:window_end]
+            
+            # Contar concordâncias na direção
+            directions = []
+            for idx, row in window_data.iterrows():
+                if pd.notna(row['predicted_pips_ensemble']):
+                    # 1 se bullish (pips > 0), -1 se bearish
+                    directions.append(1 if row['predicted_pips_ensemble'] > 0 else -1)
+            
+            if len(directions) > 0:
+                consensus = abs(sum(directions))  # Quantos concordam (0-5)
+                confluence_scores.append(int(consensus))
+            else:
+                confluence_scores.append(0)
+    
+    return confluence_scores
+
+
+def apply_signal_filters(df):
+    """Aplica os 3 filtros e marca signal_status"""
+    
+    # Inicializar colunas
+    df['confluence_score'] = calculate_confluence_score(df)
+    df['confluence_bonus_pct'] = 0.0
+    df['confidence_base'] = df['confidence_pct'].copy()
+    df['confidence_with_bonus_pct'] = df['confidence_pct'].copy()
+    df['signal_status'] = 'NO_PREDICTION'
+    
+    # Para linhas com predição
+    has_pred = df['predicted_pips_ensemble'].notna()
+    
+    # Filtro 1: Confidence >= 90%
+    f1 = (df['confidence_pct'] >= 90) & has_pred
+    
+    # Filtro 2: Confluence >= 3
+    f2 = (df['confluence_score'] >= 3) & has_pred
+    
+    # Aplicar bonus se ambos os filtros passam
+    both_filters = f1 & f2
+    df.loc[both_filters, 'confluence_bonus_pct'] = 15.0
+    df.loc[both_filters, 'confidence_with_bonus_pct'] = df.loc[both_filters, 'confidence_pct'] * (1 + 0.15)
+    
+    # Marcar como FILTERED se passou nos filtros
+    df.loc[both_filters, 'signal_status'] = 'FILTERED'
+    
+    # Marcar como SEND apenas o primeiro de cada dia que passou nos filtros
+    df['date'] = df['timestamp'].dt.date
+    
+    for date in df['date'].unique():
+        day_data_idx = df[df['date'] == date].index
+        day_filtered = df.loc[day_data_idx][df.loc[day_data_idx, 'signal_status'] == 'FILTERED']
+        
+        if len(day_filtered) > 0:
+            # Marcar apenas o PRIMEIRO
+            first_idx = day_filtered.index[0]
+            df.loc[first_idx, 'signal_status'] = 'SEND'
+    
+    df.drop('date', axis=1, inplace=True)
+    
+    return df
+
+
 def create_output_csv(df_full, df_train_idx, predictions, output_file, symbol):
     """Cria arquivo de saída com ordem cronológica mantida e predições apenas nos 30% finais"""
     print(f"\n💾 Gerando arquivo de saída...")
@@ -232,6 +305,11 @@ def create_output_csv(df_full, df_train_idx, predictions, output_file, symbol):
     # Coluna de preço real (target)
     df_output['actual_price'] = df_output['target_price']
     
+    # ========================================================================
+    # APLICAR FILTROS DE SINAL
+    # ========================================================================
+    df_output = apply_signal_filters(df_output)
+    
     # Selecionar colunas para saída
     output_cols = [
         'timestamp',
@@ -251,14 +329,20 @@ def create_output_csv(df_full, df_train_idx, predictions, output_file, symbol):
         'predicted_price_xgb',
         'predicted_price_rf',
         'predicted_price_ensemble',
-        # Confiança
+        # Confiança (base e com bonus)
         'confidence',
         'confidence_pct',
+        'confidence_base',
+        'confluence_score',
+        'confluence_bonus_pct',
+        'confidence_with_bonus_pct',
         # Resultado
         'actual_price',
         'predicted_pips_ensemble',
         'actual_pips',
-        'error_pips'
+        'error_pips',
+        # Status do sinal
+        'signal_status'
     ]
     
     # Manter apenas colunas que existem no dataframe
@@ -271,11 +355,20 @@ def create_output_csv(df_full, df_train_idx, predictions, output_file, symbol):
     with_pred = df_output['predicted_price_ensemble'].notna().sum()
     without_pred = df_output['predicted_price_ensemble'].isna().sum()
     
+    # Contar sinais SEND e FILTERED
+    sends = (df_output['signal_status'] == 'SEND').sum()
+    filtered = (df_output['signal_status'] == 'FILTERED').sum()
+    no_pred = (df_output['signal_status'] == 'NO_PREDICTION').sum()
+    
     print(f"✅ {output_file}")
     print(f"   Total linhas: {len(df_output)}")
     print(f"   Com predições: {with_pred} (30% - teste)")
     print(f"   Sem predições: {without_pred} (70% - treino)")
-    print(f"   Tamanho: {df_output.memory_usage(deep=True).sum() / 1024 / 1024:.1f} MB")
+    print(f"\n   📊 Status de Sinais (nas linhas com predição):")
+    print(f"   - SEND: {sends} sinais (será enviado para Telegram)")
+    print(f"   - FILTERED: {filtered} sinais (passou nos filtros, mas não é o primeiro do dia)")
+    print(f"   - NO_PREDICTION: {no_pred} (sem predição)")
+    print(f"\n   Tamanho: {df_output.memory_usage(deep=True).sum() / 1024 / 1024:.1f} MB")
     
     return df_output
 
@@ -358,20 +451,25 @@ Arquivos gerados:
   📊 /home/ubuntu/pessoal/options/results/backtest_EURUSD_chronological.csv
   📊 /home/ubuntu/pessoal/options/results/backtest_GBPUSD_chronological.csv
 
-Colunas de saída (22 total):
-  1. timestamp
-  2-13. Indicadores (rsi, sma20, sma50, macd, atr, momentum + binários)
-  14. predicted_price_xgb
-  15. predicted_price_rf
-  16. predicted_price_ensemble
-  17. confidence
-  18. confidence_pct
-  19. actual_price (D+1 14:00)
-  20. predicted_pips_ensemble
-  21. actual_pips
-  22. error_pips
+✨ Novas colunas com filtros de sinal:
+  1. confidence_base - Confiança sem bonus
+  2. confluence_score - Score de confluência (0-5)
+  3. confluence_bonus_pct - Bonus de 15% se confluence >= 3
+  4. confidence_with_bonus_pct - Confiança final com bonus
+  5. signal_status - SEND / FILTERED / NO_PREDICTION
 
-⚠️ IMPORTANTE: Apenas últimas 30% de cada arquivo contêm predições (conjunto de teste)
+📊 Colunas completas:
+  Indicadores: timestamp, close, rsi, sma20, sma50, macd, atr, momentum, sd, bb_*, smc_*
+  Predições: predicted_price_xgb, predicted_price_rf, predicted_price_ensemble
+  Confiança: confidence_pct, confidence_base, confluence_score, confluence_bonus_pct, confidence_with_bonus_pct
+  Resultado: actual_price, predicted_pips_ensemble, actual_pips, error_pips
+  Status: signal_status
+
+⚠️ IMPORTANTE: 
+  • Últimas 30% contêm predições e status de sinal
+  • Primeiras 70% têm signal_status = NO_PREDICTION
+  • Apenas 1 SEND por dia (primeiro que passa nos filtros)
+  • SEND = enviado para Telegram | FILTERED = passou filtros mas não é o primeiro
     """)
 
 if __name__ == '__main__':
