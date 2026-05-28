@@ -1,0 +1,48 @@
+
+================================================================================
+📊 ANÁLISE DETALHADA - EURUSD
+================================================================================
+
+🔹 PERFORMANCE GERAL
+   Amostras: 17,871
+   
+   Antes (Ensemble):
+   ├─ Win Rate: 45.00%
+   ├─ Total Pips: -17028.30
+   └─ Avg Pips/Trade: -0.95
+   
+   Depois (Decision Tree):
+   ├─ Win Rate: 66.51%
+   ├─ Total Pips: 230815.50
+   └─ Avg Pips/Trade: 12.92
+   
+   Melhoria:
+   ├─ Win Rate: +21.51%
+   ├─ Total Pips: +247843.80
+   └─ Refinamento Rate: 40.5%
+
+🔹 CONFIANÇA
+   Média: 88.30%
+   Mínima: 0.01%
+   Máxima: 100.00%
+
+🔹 REFINEMENT SCORE
+   Média: 0.3194
+   Mínima: 0.0265
+   Máxima: 1.0000
+
+🔹 DISTRIBUIÇÃO DE RESULTADOS
+   WIN:  11,886 (66.51%)
+   LOSS: 5,915 (33.10%)
+   BE:   70 (0.39%)
+
+🔹 PIPS POR RESULTADO
+   WIN - Média: 32.86 pips
+   LOSS - Média: -27.01 pips
+   Razão W/L: 1.22x
+
+🔹 ERROS DE PREDIÇÃO
+   MAE: 44.69 pips
+   RMSE: 59.34 pips
+
+================================================================================
