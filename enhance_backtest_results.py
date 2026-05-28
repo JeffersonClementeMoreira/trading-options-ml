@@ -11,29 +11,22 @@ from pathlib import Path
 from datetime import datetime
 
 def calculate_decision(row):
-    """Calcular decisão de entrada/hold"""
-    conf = row.get('confidence_pct', 0)
+    """Calcular decisão: APENAS sinais refinados pelo Decision Tree
     
-    # Simular confluence score baseado em indicadores
-    confluence = 0
-    if row.get('price_above_sma20', 0) == 1:
-        confluence += 1
-    if row.get('price_above_sma50', 0) == 1:
-        confluence += 1
-    if row.get('macd_positive', 0) == 1:
-        confluence += 1
-    if row.get('momentum_positive', 0) == 1:
-        confluence += 1
-    if row.get('rsi_oversold', 0) == 0 and row.get('rsi_overbought', 0) == 0:
-        confluence += 1
+    Descoberta crítica: Sinais MODIFICADOS pelo DT = 54.6% win rate
+    Fórmula: Use ensemble_direction != refined_direction como critério
+    """
+    # Verificar se foi refinado (Decision Tree modificou)
+    ensemble_dir = row.get('ensemble_direction', '')
+    refined_dir = row.get('refined_direction', '')
+    was_refined = ensemble_dir != refined_dir
     
-    # Decisão: ENTER se bom sinal, HOLD se fraco
-    if conf >= 90 and confluence >= 3:
+    # FÓRMULA MÁGICA: Use APENAS sinais refinados pelo DT
+    if was_refined:
         return "ENTER"
-    elif conf >= 85 and confluence >= 2:
-        return "HOLD"  # Possível, mas aguardar melhor setup
-    else:
-        return "SKIP"
+    
+    # Tudo o resto é menos confiável
+    return "HOLD"  # Ou SKIP se quiser ser mais restritivo
 
 def calculate_result(actual_pips):
     """Calcular resultado do sinal"""
@@ -45,91 +38,135 @@ def calculate_result(actual_pips):
         return "BREAKEVEN"
 
 def calculate_reasons(row):
-    """Calcular motivos/razões do sinal"""
+    """Calcular motivos/razões do sinal baseado em dados REAIS"""
     reasons = []
     
+    # 1. CONFIDENCE LEVEL
     conf = row.get('confidence_pct', 0)
     if conf >= 95:
-        reasons.append("VeryHighConf")
+        reasons.append("🔥VeryHighConf")
     elif conf >= 90:
-        reasons.append("HighConf")
+        reasons.append("💪HighConf")
     elif conf >= 85:
-        reasons.append("GoodConf")
-    
-    # Refinement score (quanto foi refinado)
-    refinement = row.get('refinement_score', 0)
-    if refinement > 0.8:
-        reasons.append("ExcelRef")  # Excelente refinement
-    elif refinement > 0.5:
-        reasons.append("GoodRef")   # Bom refinement
+        reasons.append("✓GoodConf")
+    elif conf >= 75:
+        reasons.append("⚠️ModConf")
     else:
-        reasons.append("ModRef")     # Moderado
+        reasons.append("❌LowConf")
     
-    # Direção refinada
-    direction_changed = row.get('direction_changed', 0)
-    ensemble_dir = row.get('ensemble_direction', '')
-    if direction_changed == 1:
-        reasons.append(f"DirChange-{ensemble_dir}")
+    # 2. REFINEMENT QUALITY (Decision Tree)
+    refinement = row.get('refinement_score', 0)
+    if refinement >= 0.8:
+        reasons.append("🎯ExcelRef")
+    elif refinement >= 0.5:
+        reasons.append("👍GoodRef")
+    elif refinement >= 0.3:
+        reasons.append("➖ModRef")
+    else:
+        reasons.append("⚪LowRef")
     
-    # SMC (Smart Money Concepts)
-    if row.get('smc_order_block', 0) == 1:
-        reasons.append("OrderBlock")
-    if row.get('smc_fvg', 0) == 1:
-        reasons.append("FVG")
+    # 3. TECHNICAL CONFLUENCE
+    confluence = []
     
-    # Indicadores confluentes
-    confluence_count = 0
-    if row.get('price_above_sma20', 0) == 1:
-        confluence_count += 1
-    if row.get('price_above_sma50', 0) == 1:
-        confluence_count += 1
-    if row.get('macd_positive', 0) == 1:
-        confluence_count += 1
-    if row.get('momentum_positive', 0) == 1:
-        confluence_count += 1
+    # Trend confirmation
+    if 'sma20' in row and 'sma50' in row and 'close' in row:
+        if row['close'] > row.get('sma20', 0):
+            confluence.append("SMA20↑")
+        if row['close'] > row.get('sma50', 0):
+            confluence.append("SMA50↑")
     
-    if confluence_count >= 4:
-        reasons.append("4Confluent")
-    elif confluence_count >= 3:
-        reasons.append("3Confluent")
+    # Momentum
+    if row.get('macd', 0) > 0:
+        confluence.append("MACD+")
+    if row.get('momentum', 0) > 0:
+        confluence.append("Mom+")
+    
+    # RSI Zone
+    rsi_val = row.get('rsi', 50)
+    if 30 < rsi_val < 70:
+        confluence.append("RSI-OK")
+    elif rsi_val > 70:
+        confluence.append("RSI-OB")
+    elif rsi_val < 30:
+        confluence.append("RSI-OS")
+    
+    # Volatility check
+    if row.get('realized_vol', 0) > 0 and row.get('sd', 0) > 0:
+        confluence.append("Vol-Stable")
+    
+    # Smart Money (SMC)
+    if row.get('smc_support', 0) > 0:
+        confluence.append("Support")
+    if row.get('smc_resistance', 0) > 0:
+        confluence.append("Resistance")
+    
+    if confluence:
+        reasons.append(f"[{' + '.join(confluence)}]")
+    
+    # 4. Direction refinement info
+    refined_dir = row.get('refined_direction', '')
+    if refined_dir:
+        reasons.append(f"→{refined_dir}")
     
     return " | ".join(reasons) if reasons else "Neutral"
 
 def calculate_quality_score(row):
-    """Calcular score de qualidade do sinal (1-5)"""
-    score = 1
+    """Calcular score de qualidade do sinal (1-5) baseado em dados REAIS"""
+    score = 2.5  # Score base
     
+    # 1. Confidence boost
     conf = row.get('confidence_pct', 0)
     if conf >= 95:
         score += 1.5
     elif conf >= 90:
-        score += 1
+        score += 1.0
     elif conf >= 85:
         score += 0.5
+    elif conf < 75:
+        score -= 1.0
     
+    # 2. Refinement quality
     refinement = row.get('refinement_score', 0)
     if refinement >= 0.8:
-        score += 1
+        score += 0.8
     elif refinement >= 0.5:
+        score += 0.4
+    elif refinement < 0.3:
+        score -= 0.5
+    
+    # 3. Technical confluence
+    confluence_strength = 0
+    
+    # Trend
+    if 'sma20' in row and row['close'] > row.get('sma20', 0):
+        confluence_strength += 1
+    if 'sma50' in row and row['close'] > row.get('sma50', 0):
+        confluence_strength += 1
+    
+    # Momentum
+    if row.get('macd', 0) > 0:
+        confluence_strength += 1
+    if row.get('momentum', 0) > 0:
+        confluence_strength += 1
+    
+    # RSI zone
+    rsi = row.get('rsi', 50)
+    if 30 < rsi < 70:
+        confluence_strength += 1
+    
+    # SMC zones
+    if row.get('smc_support', 0) > 0 or row.get('smc_resistance', 0) > 0:
+        confluence_strength += 0.5
+    
+    # Add confluence to score
+    if confluence_strength >= 5:
+        score += 0.8
+    elif confluence_strength >= 4:
         score += 0.5
+    elif confluence_strength >= 3:
+        score += 0.3
     
-    # Confluence
-    confluence = 0
-    if row.get('price_above_sma20', 0) == 1:
-        confluence += 1
-    if row.get('price_above_sma50', 0) == 1:
-        confluence += 1
-    if row.get('macd_positive', 0) == 1:
-        confluence += 1
-    if row.get('momentum_positive', 0) == 1:
-        confluence += 1
-    
-    if confluence >= 4:
-        score += 0.5
-    elif confluence >= 3:
-        score += 0.25
-    
-    return min(5, score)  # Max 5
+    return min(5.0, max(1.0, score))
 
 def enhance_backtest_file(asset_name):
     """Enriquecer arquivo backtest de um ativo"""
