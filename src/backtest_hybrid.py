@@ -4,7 +4,7 @@ BACKTEST HYBRID - Combina estrutura anterior com Multi-Output Learning
 - 70/30 chronológico (treino/validação)
 - Confiança integrada no treino via pesos
 - Mantém estrutura de colunas anterior
-- Adiciona: confidence [0-1], filtered_mask, optimal_threshold
+- Adiciona: confidence [0-1], filtered [bool], signal_status [SEND/FILTERED/NO_PREDICTION]
 """
 
 import pandas as pd
@@ -279,6 +279,12 @@ def create_output_csv(df_full, df_train_idx, predictions_dict, output_file, symb
                                                   df_full.loc[test_idx, 'actual_pips'].values)
     df_full.loc[test_idx, 'filtered'] = predictions_dict['filtered_mask']
     
+    # Criar coluna descritiva signal_status
+    df_full['signal_status'] = 'NO_PREDICTION'
+    test_indices = np.where(test_idx)[0]  # Get actual row indices
+    df_full.loc[test_indices[predictions_dict['filtered_mask']], 'signal_status'] = 'SEND'
+    df_full.loc[test_indices[~predictions_dict['filtered_mask']], 'signal_status'] = 'FILTERED'
+    
     # Selecionar colunas (mantendo estrutura anterior + novas)
     indicators = ['rsi', 'sma20', 'sma50', 'macd', 'atr', 'momentum', 'sd', 
                   'bb_upper', 'bb_lower', 'bb_width', 'smc_support', 'smc_resistance',
@@ -289,16 +295,22 @@ def create_output_csv(df_full, df_train_idx, predictions_dict, output_file, symb
     columns = ['timestamp', 'close'] + indicators + [
         'predicted_price_xgb', 'predicted_price_rf', 'predicted_price_ensemble',
         'confidence', 'confidence_pct', 'actual_price', 'predicted_pips_ensemble',
-        'actual_pips', 'error_pips', 'filtered'
+        'actual_pips', 'error_pips', 'filtered', 'signal_status'
     ]
     
     output_df = df_full[columns].copy()
     output_df.to_csv(output_file, index=False)
     
+    # Contar sinais por status
+    send_count = (output_df['signal_status'] == 'SEND').sum()
+    filtered_count = (output_df['signal_status'] == 'FILTERED').sum()
+    
     print(f"\n✅ Output salvo: {output_file}")
-    print(f"   Linhas: {len(output_df)}")
+    print(f"   Linhas: {len(output_df):,}")
     print(f"   Colunas: {len(columns)}")
-    print(f"   Predições (test set): {test_idx.sum()}")
+    print(f"   Sinais SEND: {send_count:,}")
+    print(f"   Sinais FILTERED: {filtered_count:,}")
+    print(f"   Sem predição: {(output_df['signal_status'] == 'NO_PREDICTION').sum():,}")
 
 
 def main():

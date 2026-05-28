@@ -1,0 +1,159 @@
+
+================================================================================
+🚀 BACKTEST HYBRID (Multi-Output + 70/30 + Estrutura Anterior)
+================================================================================
+
+================================================================================
+📊 EURUSD
+================================================================================
+
+================================================================================
+📁 Processando EURUSD
+================================================================================
+
+📥 Carregando /home/ubuntu/pessoal/options/data/EURUSD_M15_202401012200_202605222015.csv...
+✅ 59569 linhas carregadas
+   Primeira: 2024-01-01 22:15:00
+   Última: 2026-05-22 20:15:00
+
+📊 Calculando indicadores técnicos...
+✅ Indicadores calculados
+
+⏰ Calculando target_price (preço do PRÓXIMO DIA às 14:00)...
+✅ Target_price calculado (preço do próximo dia às 14:00)
+
+📍 Split 70/30:
+   Treino: 41698 amostras
+   Teste:  17871 amostras
+
+────────────────────────────────────────────────────────────────────────────────
+🤖 Treinando modelos (70% = 41698 amostras)...
+────────────────────────────────────────────────────────────────────────────────
+   Features: 20
+
+   Fase 1: Treinamento base...
+   Fase 2: Calculando confiança...
+      XGB confidence: mean=0.6394, std=0.2768
+      RF confidence:  mean=0.7010, std=0.2857
+   Fase 3: Retrainando com pesos...
+
+   Train R²:
+      XGB: 0.9894
+      RF:  0.9961
+
+────────────────────────────────────────────────────────────────────────────────
+📊 Predizendo no test set (30% = 17871 amostras)...
+────────────────────────────────────────────────────────────────────────────────
+
+────────────────────────────────────────────────────────────────────────────────
+🎯 Encontrando threshold ótimo...
+────────────────────────────────────────────────────────────────────────────────
+
+ threshold  win_rate  signals  coverage
+      0.50 51.592445    14349 80.292093
+      0.55 51.622290    13746 76.917912
+      0.60 51.600957    12961 72.525320
+      0.65 51.464159    12123 67.836159
+      0.70 51.317942    11002 61.563427
+      0.75 51.292083     9713 54.350624
+      0.80 51.021898     8220 45.996307
+      0.85 50.833076     6482 36.271054
+      0.90 49.457605     4517 25.275586
+
+✅ Threshold ótimo: 0.55
+   Win rate esperado: 51.62%
+   Coverage: 76.9%
+
+📈 Estatísticas:
+   Win Rate (todos): 51.24%
+   Win Rate (filtrado): 51.62%
+   Confiança média: 0.6941
+   Confiança (filtrado): 0.8204
+   MAE: 0.00 pips
+
+✅ Output salvo: /home/ubuntu/pessoal/options/results/backtest_EURUSD_hybrid.csv
+   Linhas: 59,569
+   Colunas: 35
+   Sinais SEND: 13,746
+   Sinais FILTERED: 4,125
+   Sem predição: 41,698
+
+================================================================================
+📊 GBPUSD
+================================================================================
+
+================================================================================
+📁 Processando GBPUSD
+================================================================================
+
+📥 Carregando /home/ubuntu/pessoal/options/data/GBPUSD_M15_202401012200_202605222015.csv...
+✅ 59567 linhas carregadas
+   Primeira: 2024-01-01 22:15:00
+   Última: 2026-05-22 20:15:00
+
+📊 Calculando indicadores técnicos...
+✅ Indicadores calculados
+
+⏰ Calculando target_price (preço do PRÓXIMO DIA às 14:00)...
+✅ Target_price calculado (preço do próximo dia às 14:00)
+
+📍 Split 70/30:
+   Treino: 41696 amostras
+   Teste:  17871 amostras
+
+────────────────────────────────────────────────────────────────────────────────
+🤖 Treinando modelos (70% = 41696 amostras)...
+────────────────────────────────────────────────────────────────────────────────
+   Features: 20
+
+   Fase 1: Treinamento base...
+   Fase 2: Calculando confiança...
+      XGB confidence: mean=0.6500, std=0.2739
+      RF confidence:  mean=0.6973, std=0.2859
+   Fase 3: Retrainando com pesos...
+
+   Train R²:
+      XGB: 0.9859
+      RF:  0.9948
+
+────────────────────────────────────────────────────────────────────────────────
+📊 Predizendo no test set (30% = 17871 amostras)...
+────────────────────────────────────────────────────────────────────────────────
+
+────────────────────────────────────────────────────────────────────────────────
+🎯 Encontrando threshold ótimo...
+────────────────────────────────────────────────────────────────────────────────
+
+ threshold  win_rate  signals  coverage
+      0.50 52.177267    14261 79.799675
+      0.55 52.214265    13684 76.570981
+      0.60 52.228809    12989 72.681999
+      0.65 52.149701    12211 68.328577
+      0.70 52.117553    11263 63.023893
+      0.75 52.208914    10186 56.997370
+      0.80 52.274795     8792 49.197023
+      0.85 52.314026     7044 39.415813
+      0.90 52.191395     4974 27.832802
+
+✅ Threshold ótimo: 0.85
+   Win rate esperado: 52.31%
+   Coverage: 39.4%
+
+📈 Estatísticas:
+   Win Rate (todos): 52.02%
+   Win Rate (filtrado): 52.31%
+   Confiança média: 0.7007
+   Confiança (filtrado): 0.9285
+   MAE: 0.00 pips
+
+✅ Output salvo: /home/ubuntu/pessoal/options/results/backtest_GBPUSD_hybrid.csv
+   Linhas: 59,567
+   Colunas: 35
+   Sinais SEND: 7,044
+   Sinais FILTERED: 10,827
+   Sem predição: 41,696
+
+================================================================================
+✅ BACKTEST HYBRID COMPLETO
+================================================================================
+
