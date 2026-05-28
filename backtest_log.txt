@@ -1,0 +1,141 @@
+
+================================================================================
+🚀 BACKTEST CHRONOLOGICAL - Mantém Ordem + Predições
+================================================================================
+
+
+================================================================================
+EURUSD
+================================================================================
+
+================================================================================
+📁 Processando EURUSD
+================================================================================
+
+📥 Carregando /home/ubuntu/pessoal/options/data/EURUSD_M15_202401012200_202605222015.csv...
+✅ 59569 linhas carregadas
+   Primeira: 2024-01-01 22:15:00
+   Última: 2026-05-22 20:15:00
+
+📊 Calculando indicadores técnicos (módulo indicators.py)...
+✅ Indicadores calculados
+
+⏰ Calculando target_price (preço às 14:00 do dia seguinte)...
+✅ Target_price calculado
+   Validação: Todas as linhas do mesmo dia têm target igual? ✅ SIM
+
+✅ Split temporal:
+   Treino: 41698 linhas (70%)
+   Teste: 17871 linhas (30%)
+
+────────────────────────────────────────────────────────────────────────────────
+🤖 Treinando modelos com 41698 linhas (70% histórico)
+────────────────────────────────────────────────────────────────────────────────
+
+📊 Features utilizadas (20):
+   rsi, sma20, sma50, macd, atr...
+
+🔹 Treinando XGBoost...
+   ✅ MAE: 22.75 pips, R²: 0.9936
+
+🔹 Treinando RandomForest...
+   ✅ MAE: 10.10 pips, R²: 0.9984
+
+────────────────────────────────────────────────────────────────────────────────
+🔮 Fazendo predições nos últimos 17871 linhas (30% recente)
+────────────────────────────────────────────────────────────────────────────────
+
+📊 Métricas no conjunto de teste:
+   ✅ MAE: 43.90 pips
+   ✅ R²: 0.6993
+   ✅ Total Pips: -17028.30
+   ✅ Win Rate: 8042/17871 = 45.00%
+   ✅ Confiança Média: 91.14%
+
+💾 Gerando arquivo de saída...
+✅ /home/ubuntu/pessoal/options/results/backtest_EURUSD_chronological.csv
+   Total linhas: 59569
+   Com predições: 17871 (30% - teste)
+   Sem predições: 41698 (70% - treino)
+   Tamanho: 15.0 MB
+
+
+================================================================================
+GBPUSD
+================================================================================
+
+================================================================================
+📁 Processando GBPUSD
+================================================================================
+
+📥 Carregando /home/ubuntu/pessoal/options/data/GBPUSD_M15_202401012200_202605222015.csv...
+✅ 59567 linhas carregadas
+   Primeira: 2024-01-01 22:15:00
+   Última: 2026-05-22 20:15:00
+
+📊 Calculando indicadores técnicos (módulo indicators.py)...
+✅ Indicadores calculados
+
+⏰ Calculando target_price (preço às 14:00 do dia seguinte)...
+✅ Target_price calculado
+   Validação: Todas as linhas do mesmo dia têm target igual? ✅ SIM
+
+✅ Split temporal:
+   Treino: 41696 linhas (70%)
+   Teste: 17871 linhas (30%)
+
+────────────────────────────────────────────────────────────────────────────────
+🤖 Treinando modelos com 41696 linhas (70% histórico)
+────────────────────────────────────────────────────────────────────────────────
+
+📊 Features utilizadas (20):
+   rsi, sma20, sma50, macd, atr...
+
+🔹 Treinando XGBoost...
+   ✅ MAE: 27.21 pips, R²: 0.9904
+
+🔹 Treinando RandomForest...
+   ✅ MAE: 11.70 pips, R²: 0.9978
+
+────────────────────────────────────────────────────────────────────────────────
+🔮 Fazendo predições nos últimos 17871 linhas (30% recente)
+────────────────────────────────────────────────────────────────────────────────
+
+📊 Métricas no conjunto de teste:
+   ✅ MAE: 48.22 pips
+   ✅ R²: 0.8370
+   ✅ Total Pips: -10323.50
+   ✅ Win Rate: 8567/17871 = 47.94%
+   ✅ Confiança Média: 92.91%
+
+💾 Gerando arquivo de saída...
+✅ /home/ubuntu/pessoal/options/results/backtest_GBPUSD_chronological.csv
+   Total linhas: 59567
+   Com predições: 17871 (30% - teste)
+   Sem predições: 41696 (70% - treino)
+   Tamanho: 15.0 MB
+
+
+================================================================================
+✅ BACKTEST CHRONOLOGICAL COMPLETO
+================================================================================
+
+Arquivos gerados:
+  📊 /home/ubuntu/pessoal/options/results/backtest_EURUSD_chronological.csv
+  📊 /home/ubuntu/pessoal/options/results/backtest_GBPUSD_chronological.csv
+
+Colunas de saída (22 total):
+  1. timestamp
+  2-13. Indicadores (rsi, sma20, sma50, macd, atr, momentum + binários)
+  14. predicted_price_xgb
+  15. predicted_price_rf
+  16. predicted_price_ensemble
+  17. confidence
+  18. confidence_pct
+  19. actual_price (D+1 14:00)
+  20. predicted_pips_ensemble
+  21. actual_pips
+  22. error_pips
+
+⚠️ IMPORTANTE: Apenas últimas 30% de cada arquivo contêm predições (conjunto de teste)
+    

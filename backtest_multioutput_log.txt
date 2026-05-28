@@ -1,0 +1,123 @@
+
+================================================================================
+🚀 BACKTEST MULTI-OUTPUT LEARNING
+================================================================================
+
+================================================================================
+📊 EURUSD
+================================================================================
+
+1. Carregando dados...
+   Total candles: 59569
+   Treino: 41698 (70.0%)
+   Teste: 17871 (30.0%)
+
+2. Treinando modelos...
+  Treinando modelos multi-output...
+    Features: 20
+    Amostras treino: 41698
+
+  Confidence Target Statistics:
+    XGB - Mean: 0.6447, Std: 0.2758
+    RF  - Mean: 0.7268, Std: 0.2815
+
+   Train R²:
+    XGB: 0.9969
+    RF:  0.9989
+
+3. Predições...
+
+  Predizendo no test set (17871 amostras)...
+
+  Threshold Optimization Results:
+ threshold  win_rate  avg_pips  signals  coverage
+      0.50 55.422801  0.000022    14061 78.680544
+      0.55 55.516388  0.000040    13333 74.606905
+      0.60 55.431221  0.000057    12511 70.007274
+      0.65 55.426592  0.000069    11545 64.601869
+      0.70 55.304331  0.000073    10482 58.653685
+      0.75 55.290066  0.000069     9291 51.989256
+      0.80 55.219746  0.000092     7941 44.435118
+      0.85 54.839228  0.000105     6220 34.804991
+      0.90 54.972119  0.000146     4304 24.083711
+
+  ✅ Threshold Ótimo: 0.55
+
+  Estatísticas de Predição:
+    Total predições: 17871
+    Com confiança >= 0.55: 13333 (74.6%)
+    Confiança média: 0.6823
+    Confiança no filtrado: 0.8173
+
+  Performance Geral:
+    Win Rate (todos): 54.83%
+    Win Rate (filtrado): 55.52%
+    MAE: 0.00 pips
+
+4. Gerando output...
+
+  ✅ Output salvo: /home/ubuntu/pessoal/options/results/backtest_EURUSD_multioutput.csv
+    Linhas: 59569
+    Colunas: 34
+
+================================================================================
+📊 GBPUSD
+================================================================================
+
+1. Carregando dados...
+   Total candles: 59567
+   Treino: 41696 (70.0%)
+   Teste: 17871 (30.0%)
+
+2. Treinando modelos...
+  Treinando modelos multi-output...
+    Features: 20
+    Amostras treino: 41696
+
+  Confidence Target Statistics:
+    XGB - Mean: 0.6581, Std: 0.2690
+    RF  - Mean: 0.7155, Std: 0.2747
+
+   Train R²:
+    XGB: 0.9956
+    RF:  0.9985
+
+3. Predições...
+
+  Predizendo no test set (17871 amostras)...
+
+  Threshold Optimization Results:
+ threshold  win_rate  avg_pips  signals  coverage
+      0.50 58.813128  0.000146    14138 79.111410
+      0.55 58.659633  0.000153    13459 75.311958
+      0.60 58.545053  0.000151    12674 70.919367
+      0.65 58.503228  0.000145    11772 65.872083
+      0.70 58.766173  0.000137    10666 59.683286
+      0.75 58.571734  0.000114     9368 52.420122
+      0.80 58.202928  0.000104     7924 44.339992
+      0.85 57.986836  0.000110     6229 34.855352
+      0.90 58.219653  0.000092     4325 24.201220
+
+  ✅ Threshold Ótimo: 0.50
+
+  Estatísticas de Predição:
+    Total predições: 17871
+    Com confiança >= 0.50: 14138 (79.1%)
+    Confiança média: 0.6867
+    Confiança no filtrado: 0.8034
+
+  Performance Geral:
+    Win Rate (todos): 57.61%
+    Win Rate (filtrado): 58.81%
+    MAE: 0.00 pips
+
+4. Gerando output...
+
+  ✅ Output salvo: /home/ubuntu/pessoal/options/results/backtest_GBPUSD_multioutput.csv
+    Linhas: 59567
+    Colunas: 34
+
+================================================================================
+✅ BACKTEST MULTI-OUTPUT COMPLETO
+================================================================================
+

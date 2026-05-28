@@ -51,23 +51,35 @@ def load_and_process_data(csv_file, symbol):
     df = calculate_all_indicators(df)
     print(f"✅ Indicadores calculados")
     
-    # Criar target_price: preço às 14:00 do próximo dia
-    print(f"\n⏰ Calculando target_price...")
+    # Criar target_price: preço às 14:00 do PRÓXIMO dia
+    print(f"\n⏰ Calculando target_price (preço do PRÓXIMO DIA às 14:00)...")
     
     df['next_date'] = df['date_only'] + pd.Timedelta(days=1)
     
     date_price_map = {}
     for date in df['date_only'].unique():
-        day_data = df[df['date_only'] == date]
-        day_data = day_data.copy()
-        day_data['time_diff'] = (day_data['timestamp'].dt.hour * 60 + day_data['timestamp'].dt.minute - 14*60).abs()
-        closest_idx = day_data['time_diff'].idxmin()
-        date_price_map[date] = df.loc[closest_idx, 'close']
+        # Encontrar próximo dia disponível
+        next_date = date + pd.Timedelta(days=1)
+        next_day_data = df[df['date_only'] == next_date]
+        
+        if len(next_day_data) > 0:
+            # Encontrar timestamp mais próximo de 14:00 do próximo dia
+            target_time = pd.Timestamp(next_date) + pd.Timedelta(hours=14)
+            next_day_data_copy = next_day_data.copy()
+            next_day_data_copy['time_diff'] = abs((next_day_data_copy['timestamp'] - target_time).dt.total_seconds())
+            closest_idx = next_day_data_copy['time_diff'].idxmin()
+            price_at_14h = df.loc[closest_idx, 'close']
+        else:
+            # Se não houver próximo dia, usar último close do dia atual
+            day_data = df[df['date_only'] == date]
+            price_at_14h = day_data['close'].iloc[-1]
+        
+        date_price_map[date] = price_at_14h
     
     df['target_price'] = df['date_only'].map(date_price_map)
     df.reset_index(drop=True, inplace=True)
     
-    print(f"✅ Target calculado")
+    print(f"✅ Target_price calculado (preço do próximo dia às 14:00)")
     
     return df.dropna(subset=['target_price'])
 

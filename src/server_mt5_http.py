@@ -207,8 +207,16 @@ class MT5HTTPServer:
             if len(history['closes']) < 50:
                 return True  # Silenciosamente ignorar até ter 50
             
-            # Verificar se é novo candle
+            # Se acabamos de alcançar 50 candles, inicializar last_datetime
             current_dt_str = dt.isoformat()
+            if symbol not in self.last_datetime or self.last_datetime[symbol] is None:
+                # Primeira vez que temos 50+ candles: inicializar com este candle
+                self.last_datetime[symbol] = current_dt_str
+                print(f"\n📊 {symbol} PRONTO! Histórico com {len(history['closes'])} candles")
+                print(f"   Aguardando novo candle para alertar...")
+                return True  # Não enviar este candle, apenas inicializar
+            
+            # Verificar se é novo candle (diferente do último processado)
             last_dt_str = self.last_datetime.get(symbol)
             
             if current_dt_str != last_dt_str:
