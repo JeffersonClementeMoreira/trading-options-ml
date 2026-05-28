@@ -199,6 +199,34 @@ def find_optimal_threshold(df_test, pred_ensemble, confidence):
     return optimal_threshold
 
 
+def calculate_confluence_confidence(ensemble_pred, close_prices, window=5, strength=0.15):
+    """
+    Calcula confiança adicional baseada na confluência dos últimos 5 predicted prices.
+    
+    Se os últimos 5 predicted prices estão consistentemente acima/abaixo do close,
+    aumenta a confiança da predição atual.
+    """
+    confluence_bonus = np.zeros(len(ensemble_pred))
+    
+    for i in range(window, len(ensemble_pred)):
+        # Obter últimos 5 predicted prices
+        last_5_pred = ensemble_pred[i-window:i]
+        close_current = close_prices[i]
+        
+        # Calcular se está em trend bullish (acima de close) ou bearish (abaixo)
+        above_count = np.sum(last_5_pred > close_current)
+        
+        # Se todos ou quase todos (4+/5) estão na mesma direção = confluência forte
+        if above_count >= 4:  # Bullish trend nos últimos 5
+            confluence_bonus[i] = strength  # +15% confiança
+        elif above_count <= 1:  # Bearish trend nos últimos 5
+            confluence_bonus[i] = strength  # +15% confiança
+        else:
+            confluence_bonus[i] = 0  # Sem confluência clara
+    
+    return confluence_bonus
+
+
 def predict_on_test(df_test, xgb_model, rf_model, scaler, features, symbol):
     """Predições no test set (30%)"""
     print(f"\n{'─'*80}")
@@ -220,11 +248,18 @@ def predict_on_test(df_test, xgb_model, rf_model, scaler, features, symbol):
     agreement = 1 - (diff / (max_diff + 1e-6))
     agreement = np.clip(agreement, 0, 1)
     
+    # Calcular confluência dos últimos 5 predicted prices
+    confluence_bonus = calculate_confluence_confidence(ensemble_pred, df_test['close'].values)
+    
+    # Aplicar confluência como multiplicador: confiança * (1 + bonus)
+    agreement_with_confluence = agreement * (1 + confluence_bonus)
+    agreement_with_confluence = np.clip(agreement_with_confluence, 0, 1)
+    
     # Encontrar threshold ótimo
-    optimal_threshold = find_optimal_threshold(df_test, ensemble_pred, agreement)
+    optimal_threshold = find_optimal_threshold(df_test, ensemble_pred, agreement_with_confluence)
     
     # Aplicar filtro
-    filtered_mask = agreement >= optimal_threshold
+    filtered_mask = agreement_with_confluence >= optimal_threshold
     
     # Calcular métricas
     actual_dir = np.sign(df_test['target_price'].values - df_test['close'].values)
@@ -241,15 +276,20 @@ def predict_on_test(df_test, xgb_model, rf_model, scaler, features, symbol):
     print(f"\n📈 Estatísticas:")
     print(f"   Win Rate (todos): {win_rate_all:.2f}%")
     print(f"   Win Rate (filtrado): {win_rate_filtered:.2f}%")
-    print(f"   Confiança média: {agreement.mean():.4f}")
-    print(f"   Confiança (filtrado): {agreement[filtered_mask].mean():.4f}")
+    print(f"   Confiança média (base): {agreement.mean():.4f}")
+    print(f"   Confiança média (com confluência): {agreement_with_confluence.mean():.4f}")
+    print(f"   Confiança (filtrado): {agreement_with_confluence[filtered_mask].mean():.4f}")
+    print(f"   Confluência bonus (aplicado): {(confluence_bonus[confluence_bonus > 0].mean() * 100):.1f}% em média")
+    print(f"   Sinais com confluência: {(confluence_bonus > 0).sum()}")
     print(f"   MAE: {mae:.2f} pips")
     
     return {
         'xgb_pred': xgb_pred,
         'rf_pred': rf_pred,
         'ensemble_pred': ensemble_pred,
-        'confidence': agreement,
+        'confidence': agreement_with_confluence,
+        'confidence_base': agreement,
+        'confluence_bonus': confluence_bonus,
         'optimal_threshold': optimal_threshold,
         'filtered_mask': filtered_mask,
         'win_rate_all': win_rate_all,
@@ -268,7 +308,9 @@ def create_output_csv(df_full, df_train_idx, predictions_dict, output_file, symb
     df_full.loc[test_idx, 'predicted_price_xgb'] = predictions_dict['xgb_pred']
     df_full.loc[test_idx, 'predicted_price_rf'] = predictions_dict['rf_pred']
     df_full.loc[test_idx, 'predicted_price_ensemble'] = predictions_dict['ensemble_pred']
-    df_full.loc[test_idx, 'confidence'] = predictions_dict['confidence']
+    df_full.loc[test_idx, 'confidence'] = predictions_dict['confidence']  # confidence with confluence
+    df_full.loc[test_idx, 'confidence_base'] = predictions_dict['confidence_base']  # without confluence
+    df_full.loc[test_idx, 'confluence_bonus_pct'] = predictions_dict['confluence_bonus'] * 100  # bonus %
     df_full.loc[test_idx, 'confidence_pct'] = predictions_dict['confidence'] * 100
     df_full.loc[test_idx, 'actual_price'] = df_full.loc[test_idx, 'target_price']
     df_full.loc[test_idx, 'predicted_pips_ensemble'] = (predictions_dict['ensemble_pred'] - 
@@ -294,8 +336,9 @@ def create_output_csv(df_full, df_train_idx, predictions_dict, output_file, symb
     
     columns = ['timestamp', 'close'] + indicators + [
         'predicted_price_xgb', 'predicted_price_rf', 'predicted_price_ensemble',
-        'confidence', 'confidence_pct', 'actual_price', 'predicted_pips_ensemble',
-        'actual_pips', 'error_pips', 'filtered', 'signal_status'
+        'confidence_base', 'confluence_bonus_pct', 'confidence', 'confidence_pct', 
+        'actual_price', 'predicted_pips_ensemble', 'actual_pips', 'error_pips', 
+        'filtered', 'signal_status'
     ]
     
     output_df = df_full[columns].copy()
