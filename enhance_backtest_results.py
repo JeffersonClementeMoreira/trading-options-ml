@@ -10,6 +10,38 @@ import json
 from pathlib import Path
 from datetime import datetime
 
+def select_best_signal_per_day(df):
+    """Selecionar apenas o MELHOR sinal ENTER por dia
+    
+    Regra de Trading: Apenas 1 sinal por dia
+    Critério: Maior confidence + refinement_score
+    """
+    df['date'] = pd.to_datetime(df['timestamp']).dt.date
+    
+    # Sinais ENTER por dia
+    enters = df[df['decision'] == 'ENTER'].copy()
+    
+    # Se não tiver ENTER, retorna original
+    if len(enters) == 0:
+        return df
+    
+    # Calcular score: confidence + refinement (0-1 normalize)
+    enters['selection_score'] = (
+        enters['confidence_pct'] / 100 * 0.6 +  # 60% confidence
+        enters['refinement_score'] * 0.4         # 40% refinement
+    )
+    
+    # Selecionar o melhor sinal por dia
+    best_per_day = enters.sort_values('selection_score', ascending=False).drop_duplicates(subset=['date'], keep='first')
+    
+    # Índices dos melhores sinais
+    best_indices = best_per_day.index
+    
+    # Marcar todos os ENTER como HOLD exceto os melhores
+    df.loc[(df['decision'] == 'ENTER') & ~df.index.isin(best_indices), 'decision'] = 'HOLD'
+    
+    return df.drop(columns=['date', 'selection_score'], errors='ignore')
+
 def calculate_decision(row):
     """Calcular decisão: APENAS sinais refinados pelo Decision Tree
     
@@ -190,6 +222,9 @@ def enhance_backtest_file(asset_name):
         df['result'] = df['actual_pips'].apply(calculate_result)
         df['quality_score'] = df.apply(calculate_quality_score, axis=1)
         
+        # NOVO: Filtrar apenas 1 ENTER por dia (regra de trading)
+        df = select_best_signal_per_day(df)
+        
         # Reordenar colunas para análise rápida
         priority_cols = [
             'timestamp',
@@ -220,10 +255,10 @@ def enhance_backtest_file(asset_name):
         
         # Estatísticas rápidas
         enters = len(df[df['decision'] == 'ENTER'])
-        wins = len(df[df['result'] == 'WIN'])
-        losses = len(df[df['result'] == 'LOSS'])
-        avg_quality = df['quality_score'].mean()
-        total_pips = df['actual_pips'].sum()
+        wins = len(df[(df['decision'] == 'ENTER') & (df['result'] == 'WIN')])
+        losses = len(df[(df['decision'] == 'ENTER') & (df['result'] == 'LOSS')])
+        avg_quality = df[df['decision'] == 'ENTER']['quality_score'].mean() if enters > 0 else 0
+        total_pips = df[df['decision'] == 'ENTER']['actual_pips'].sum() if enters > 0 else 0
         
         stats = {
             "asset": asset_name,
@@ -233,7 +268,7 @@ def enhance_backtest_file(asset_name):
             "losses": losses,
             "win_rate": f"{(wins/(wins+losses)*100) if (wins+losses)>0 else 0:.1f}%",
             "avg_quality": f"{avg_quality:.2f}",
-            "avg_confidence": f"{df['confidence_pct'].mean():.1f}%",
+            "avg_confidence": f"{df[df['decision'] == 'ENTER']['confidence_pct'].mean():.1f}%" if enters > 0 else "0%",
             "total_pips": f"{total_pips:.0f}",
             "avg_pips_per_signal": f"{total_pips/enters:.2f}" if enters > 0 else "0"
         }
