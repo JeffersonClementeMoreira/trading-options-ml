@@ -269,7 +269,16 @@ def send_telegram_real_signal(pair, signal, confidence, entry_price, threshold, 
         return
     
     direction = "🟢 BUY" if signal == 1 else "🔴 SELL"
-    time_str = pd.Timestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S')
+    
+    # Converter timestamp com validação
+    try:
+        ts = pd.Timestamp(timestamp)
+        if pd.isna(ts):
+            time_str = str(timestamp)
+        else:
+            time_str = ts.strftime('%Y-%m-%d %H:%M:%S')
+    except:
+        time_str = str(timestamp)
     
     message = (
         f"{direction} {pair} 🎯\n\n"
@@ -309,7 +318,7 @@ def receive_real_candle():
     Esperado JSON:
     {
         "symbol": "EURUSD",
-        "datetime": "2026-05-31T14:30:00",
+        "datetime": "2026-05-31T14:30:00" ou "2026.05.31 14:30:00",
         "open": 1.0850,
         "high": 1.0851,
         "low": 1.0849,
@@ -328,9 +337,26 @@ def receive_real_candle():
         c = float(data.get('close', 0))
         v = int(data.get('volume', 0))
         
-        timestamp = pd.to_datetime(timestamp_str)
+        # Tentar múltiplos formatos de timestamp
+        timestamp = None
+        for fmt in ['%Y-%m-%dT%H:%M:%S', '%Y.%m.%d %H:%M:%S', '%Y-%m-%d %H:%M:%S', 
+                    '%Y/%m/%d %H:%M:%S', '%d.%m.%Y %H:%M:%S']:
+            try:
+                timestamp = pd.to_datetime(timestamp_str, format=fmt)
+                break
+            except:
+                continue
         
-        logger.info(f"📨 REAL: {pair} @ {timestamp.strftime('%Y-%m-%d %H:%M:%S')} | O={o:.5f} C={c:.5f} V={v}")
+        # Fallback
+        if timestamp is None or pd.isna(timestamp):
+            timestamp = pd.to_datetime(timestamp_str)
+        
+        # Validar
+        if pd.isna(timestamp):
+            raise ValueError(f"Timestamp inválido: {timestamp_str}")
+        
+        ts_str = timestamp.strftime('%Y-%m-%d %H:%M:%S')
+        logger.info(f"📨 REAL: {pair} @ {ts_str} | O={o:.5f} C={c:.5f} V={v}")
         
         # Processar candle REAL
         result = manager.process_real_candle(pair, timestamp, o, h, l, c, v)
