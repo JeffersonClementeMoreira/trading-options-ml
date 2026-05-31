@@ -4,7 +4,7 @@
 //+------------------------------------------------------------------+
 #property copyright "Trading ML System"
 #property link      "https://github.com/JeffersonClementeMoreira/trading-options-ml"
-#property version   "2.01"
+#property version   "2.02"
 #property strict
 #property description "Envia último candle M15 REAL fechado para servidor HTTP"
 
@@ -108,21 +108,18 @@ void SendLastRealCandle(string symbol)
     json_str += "\"volume\":" + IntegerToString((int)candle_volume);
     json_str += "}";
     
-    // Enviar HTTP POST
-    uchar post_data[];
-    uchar result[];
-    string headers = "Content-Type: application/json\r\n";
+    // Enviar HTTP POST (sintaxe MQL5 exata)
+    char post_data[];
+    char result[];
+    string headers = "Content-Type: application/json";
     
+    // Converter string para char array
+    int json_len = StringLen(json_str);
+    ArrayResize(post_data, json_len);
     StringToCharArray(json_str, post_data);
     
-    int ret = WebRequest(
-        ServerURL,    // URL primeiro!
-        "POST",       // depois método
-        headers,
-        30000,
-        post_data,
-        result
-    );
+    // WebRequest com sintaxe correta
+    int ret = WebRequest("POST", ServerURL, headers, 30000, post_data, result);
     
     if (ret == 200) {
         Log("[OK] " + symbol + " ✓ " + datetime_str + " O=" + DoubleToString(candle_open, 5) + 
