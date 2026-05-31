@@ -4,11 +4,9 @@
 //+------------------------------------------------------------------+
 #property copyright "Trading ML System"
 #property link      "https://github.com/JeffersonClementeMoreira/trading-options-ml"
-#property version   "2.00"
+#property version   "2.01"
 #property strict
 #property description "Envia último candle M15 REAL fechado para servidor HTTP"
-
-#include <JAson.mqh>
 
 //+------------------------------------------------------------------+
 // CONFIGURAÇÃO
@@ -54,19 +52,11 @@ void OnTick()
         return;
     }
     
-    // Processar todos os pares
-    string symArray[];
-    int count = StringSplit(Symbols, ',', symArray);
-    
-    for (int i = 0; i < count; i++) {
-        string symbol = symArray[i];
-        symbol = StringTrim(symbol);
-        
-        if (symbol == "") continue;
-        
-        // Enviar último candle M15 REAL
-        SendLastRealCandle(symbol);
-    }
+    // Processar pares manualmente (sem StringSplit para compatibilidade)
+    SendLastRealCandle("EURUSD");
+    SendLastRealCandle("GBPUSD");
+    SendLastRealCandle("EURJPY");
+    SendLastRealCandle("NZDUSD");
     
     lastSendTime = currentTime;
 }
@@ -102,28 +92,26 @@ void SendLastRealCandle(string symbol)
     long candle_volume = volume[0];
     
     // Formatar timestamp: "YYYY.MM.DD HH:MM:SS"
-    string datetime_str = TimeToString(candle_time, TIME_DATE | TIME_MINUTES);
-    datetime_str = StringSubstr(datetime_str, 0, 10) + " " + StringSubstr(datetime_str, 11, 5) + ":00";
+    string time_str = TimeToString(candle_time, TIME_DATE | TIME_MINUTES);
+    string datetime_str = StringSubstr(time_str, 0, 10) + " " + StringSubstr(time_str, 11, 5) + ":00";
     
-    // Criar JSON
-    CJSONObject *json = new CJSONObject();
-    json.AddString("symbol", symbol);
-    json.AddString("datetime", datetime_str);
-    json.AddDouble("open", candle_open);
-    json.AddDouble("high", candle_high);
-    json.AddDouble("low", candle_low);
-    json.AddDouble("close", candle_close);
-    json.AddNumber("volume", (double)candle_volume);
-    
-    string json_str = json.Serialize();
+    // Criar JSON manualmente (sem biblioteca)
+    string json_str = "{";
+    json_str += "\"symbol\":\"" + symbol + "\",";
+    json_str += "\"datetime\":\"" + datetime_str + "\",";
+    json_str += "\"open\":" + DoubleToString(candle_open, 5) + ",";
+    json_str += "\"high\":" + DoubleToString(candle_high, 5) + ",";
+    json_str += "\"low\":" + DoubleToString(candle_low, 5) + ",";
+    json_str += "\"close\":" + DoubleToString(candle_close, 5) + ",";
+    json_str += "\"volume\":" + IntegerToString((int)candle_volume);
+    json_str += "}";
     
     // Enviar HTTP POST
-    int request_id = 0;
     char post_data[];
     char result[];
     string headers = "Content-Type: application/json\r\n";
     
-    StringToCharArray(json_str, post_data, 0, StringLen(json_str));
+    StringToCharArray(json_str, post_data);
     
     int ret = WebRequest(
         "POST",
@@ -139,16 +127,14 @@ void SendLastRealCandle(string symbol)
             " C=" + DoubleToString(candle_close, 5) + " V=" + IntegerToString((int)candle_volume));
     }
     else if (ret == 400) {
-        Log("[ERROR] " + symbol + " code=400 (requisição inválida)");
+        Log("[ERROR] " + symbol + " code=400");
     }
     else if (ret == -1) {
-        Log("[ERROR] " + symbol + " code=-1 (erro de rede/timeout)");
+        Log("[ERROR] " + symbol + " code=-1 (rede/timeout)");
     }
     else {
         Log("[ERROR] " + symbol + " code=" + IntegerToString(ret));
     }
-    
-    delete json;
 }
 
 //+------------------------------------------------------------------+
