@@ -108,18 +108,17 @@ void SendLastRealCandle(string symbol)
     json_str += "\"volume\":" + IntegerToString((int)candle_volume);
     json_str += "}";
     
-    // Enviar HTTP POST (sintaxe MQL5 exata)
-    char post_data[];
-    char result[];
+    // Enviar HTTP POST (sintaxe MQL5 correta)
+    uchar post_data[];
+    uchar result[];
+    string result_headers;
     string headers = "Content-Type: application/json";
     
-    // Converter string para char array
-    int json_len = StringLen(json_str);
-    ArrayResize(post_data, json_len);
+    // Converter string para uchar array
     StringToCharArray(json_str, post_data);
     
-    // WebRequest com sintaxe correta
-    int ret = WebRequest("POST", ServerURL, headers, 30000, post_data, result);
+    // WebRequest com assinatura correta
+    int ret = WebRequest("POST", ServerURL, headers, 30000, post_data, result, result_headers);
     
     if (ret == 200) {
         Log("[OK] " + symbol + " ✓ " + datetime_str + " O=" + DoubleToString(candle_open, 5) + 
