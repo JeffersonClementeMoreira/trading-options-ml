@@ -113,9 +113,7 @@ void SendLastRealCandle(string symbol)
     uchar result[];
     string headers = "Content-Type: application/json\r\n";
     
-    int json_len = StringLen(json_str);
-    ArrayResize(post_data, json_len + 1);
-    StringToCharArray(json_str, post_data, 0, json_len);
+    StringToCharArray(json_str, post_data);
     
     int ret = WebRequest(
         "POST",
