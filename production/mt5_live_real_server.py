@@ -361,8 +361,14 @@ def receive_real_candle():
         # Processar candle REAL
         result = manager.process_real_candle(pair, timestamp, o, h, l, c, v)
         
+        # Garantir que result tem todas as chaves necessárias
+        if 'entry_price' not in result:
+            result['entry_price'] = c
+        if 'threshold' not in result:
+            result['threshold'] = OPTIMAL_THRESHOLDS.get(pair, 0.85)
+        
         # Enviar Telegram se há sinal
-        if result['signal'] == 1:
+        if result.get('signal', 0) == 1:
             send_telegram_real_signal(pair, result['signal'], result['confidence'], 
                                      result['entry_price'], result['threshold'],
                                      o, h, l, v, timestamp)
@@ -370,9 +376,9 @@ def receive_real_candle():
         return jsonify({
             'status': 'ok',
             'pair': pair,
-            'signal': result['signal'],
-            'confidence': result['confidence'],
-            'entry_price': result['entry_price'],
+            'signal': result.get('signal', 0),
+            'confidence': result.get('confidence', 0.0),
+            'entry_price': result.get('entry_price', c),
             'data_type': 'REAL',
             'timestamp': datetime.utcnow().isoformat() + 'Z'
         })
