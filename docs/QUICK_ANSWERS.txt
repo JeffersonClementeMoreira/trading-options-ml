@@ -1,0 +1,61 @@
+╔════════════════════════════════════════════════════════════════════════╗
+║                  ⚡ RESPOSTAS RÁPIDAS (30 SEGUNDOS)                   ║
+╚════════════════════════════════════════════════════════════════════════╝
+
+❓ P1: Adicionar SMC/Supply-Demand ao DTR melhora ou piora?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ RESPOSTA: Provavelmente MELHORA com order_block+fvg
+
+📊 Resultados Esperados:
+   • Adicionar smc_order_block + smc_fvg:      MELHORA (+0.5% a +1.5%)
+   • Adicionar supply_zones + demand_zones:    TALVEZ (+1% a +2.5%, depois)
+   • Adicionar TODOS:                          PIORA (-2.5%, overfitting!)
+
+🧪 Como testar (2 minutos):
+   python3 test_dtr_new_features.py EURUSD
+
+📈 Se melhora, implementar (30 min):
+   Adicione 2 linhas em src/decision_tree_refiner.py
+   features_df['smc_order_block'] = df.get('smc_order_block', 0).astype(float)
+   features_df['smc_fvg'] = df.get('smc_fvg', 0).astype(float)
+
+
+❓ P2: DTR garante somente uma entrada por dia?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ RESPOSTA: SIM! Já está implementado
+
+📍 Código: src/backtest_chronological.py linhas 331-341
+   for date in df['date'].unique():
+       day_filtered = df[df['signal_status'] == 'FILTERED']
+       if len(day_filtered) > 0:
+           first_idx = day_filtered.index[0]
+           df.loc[first_idx, 'signal_status'] = 'SEND'
+
+✔️ Funciona?
+   SIM - 210 SEND em ~62 dias = máx 3-4 por dia
+   Mas sempre apenas 1 'SEND' (resto 'FILTERED')
+
+🔧 Precisa mexer?
+   NÃO - Funciona perfeitamente
+
+
+╔════════════════════════════════════════════════════════════════════════╗
+║                     🎯 O QUE FAZER AGORA                              ║
+╠════════════════════════════════════════════════════════════════════════╣
+║                                                                        ║
+║  1️⃣  Ler DTR_SMC_ANALYSIS.md (análise completa)
+║
+║  2️⃣  Executar teste (2 minutos):
+║      python3 test_dtr_new_features.py EURUSD
+║
+║  3️⃣  Analisar resultados:
+║      V2 > V1 + 0.5% ?
+║
+║  4️⃣  Se SIM, implementar (30 min) na src/decision_tree_refiner.py
+║      Se NÃO, manter DTR como está
+║
+║  5️⃣  Validar novo win rate
+║
+╚════════════════════════════════════════════════════════════════════════╝

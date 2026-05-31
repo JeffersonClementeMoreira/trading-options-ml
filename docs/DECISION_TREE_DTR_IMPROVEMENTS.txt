@@ -1,0 +1,172 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║  🌳 DECISION TREE: O Que Fazer com SMC/Supply-Demand no DTR?                 ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+                          ┌─────────────────────┐
+                          │   Quer melhorar    │
+                          │  DTR win rate de   │
+                          │    66.51%?         │
+                          └────────┬────────────┘
+                                   │
+                    ┌──────────────┴──────────────┐
+                    │                             │
+                ┌─────┴─────┐                ┌────┴─────┐
+                │    SIM    │                │   NÃO    │
+                └──────┬────┘                └─────┬────┘
+                       │                          │
+                       ▼                          ▼
+            ┌──────────────────┐      ┌────────────────────────┐
+            │ Quer usar indicadores│   │ Mantém DTR como está  │
+            │ SMC já calculados? │   │                        │
+            │ (order_block+fvg)  │   │ ✅ 66.51% win rate     │
+            └────────┬───────────┘   │ ✅ Sem risco           │
+                     │               │ ✅ Sem implementação   │
+         ┌───────────┴──────────┐    └────────────────────────┘
+         │                      │
+      ┌──┴─────┐            ┌───┴──────┐
+      │  SIM   │            │   NÃO    │
+      └───┬────┘            └────┬─────┘
+          │                      │
+          ▼                      ▼
+    ┌──────────────┐    ┌─────────────────────┐
+    │ FASE 1: TESTE│    │ Espera por supply/  │
+    │              │    │ demand implementado │
+    │ Execute:     │    │                     │
+    │ python3      │    │ ⏳ Será adicionado  │
+    │ test_dtr_    │    │    futuramente      │
+    │ new_features │    └─────────────────────┘
+    │ .py EURUSD   │
+    └───┬──────────┘
+        │
+        ▼
+    ┌─────────────────────────────────────────┐
+    │ FASE 2: ANALISAR RESULTADOS             │
+    ├─────────────────────────────────────────┤
+    │                                         │
+    │ V2 WIN RATE vs V1?                      │
+    │                                         │
+    │ V2 > V1 + 0.5%?                         │
+    │ (ex: 66.51% → 67.01%)                   │
+    │                                         │
+    └─────────┬──────────────┬────────────────┘
+              │              │
+          ┌───┴───┐       ┌──┴──────┐
+          │ SIM✅ │       │ NÃO ❌  │
+          └───┬───┘       └────┬────┘
+              │                │
+              ▼                ▼
+    ┌─────────────────┐  ┌──────────────────┐
+    │ FASE 3:        │  │ Manter DTR v1    │
+    │ IMPLEMENTAR!   │  │ (66.51%)         │
+    │                │  │                  │
+    │ 1. Abrir       │  │ Motivo: Sem      │
+    │    decision_   │  │ melhoria         │
+    │    tree_refiner│  │                  │
+    │    .py         │  │ Próximo:         │
+    │                │  │ Testar outras    │
+    │ 2. Adicionar:  │  │ melhorias        │
+    │    features_df │  │ (momentum refinado)
+    │    ['smc_order │  └──────────────────┘
+    │    _block']    │
+    │                │
+    │    features_df │
+    │    ['smc_fvg'] │
+    │                │
+    │ 3. Salvar      │
+    │                │
+    │ 4. Rodar teste │
+    │    backtest_   │
+    │    chronolog   │
+    │    ical.py     │
+    │                │
+    │ 5. Validar novo│
+    │    win rate    │
+    │    (esperado   │
+    │    ~67.0%+)    │
+    │                │
+    └────────┬───────┘
+             │
+             ▼
+    ┌──────────────────────────┐
+    │ Novo win rate >= 67.0%?  │
+    └────────┬────────┬────────┘
+             │        │
+          ┌──┴──┐   ┌─┴───┐
+          │ SIM │   │ NÃO │
+          └──┬──┘   └──┬──┘
+             │         │
+             ▼         ▼
+    ┌──────────────┐ ┌──────────────────────┐
+    │ ✅ SUCESSO!  │ │ ⚠️ FALHOU             │
+    │              │ │                      │
+    │ Commit DTR   │ │ Reverter mudanças    │
+    │ v2 em prod   │ │ Manter DTR v1        │
+    │              │ │                      │
+    │ Próximo:     │ │ Motivo: Correlação   │
+    │ Considerar   │ │ ou overfitting       │
+    │ supply/demand│ │                      │
+    │ zones (V3)   │ │ Próximo: Testar      │
+    │ na semana 2  │ │ outros indicadores   │
+    └──────────────┘ └──────────────────────┘
+
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║  📋 CHECKLIST: O Que Fazer AGORA                                             ║
+╠═══════════════════════════════════════════════════════════════════════════════╣
+║                                                                               ║
+║  ETAPA 1: PREPARAÇÃO (5 minutos)
+║  ─────────────────────────────────────────────────────────────────────────
+║  ☐ Ler DTR_SMC_ANALYSIS.md (entender diferenças)
+║  ☐ Ler HOW_TO_TEST_DTR_IMPROVEMENTS.md (plano de ação)
+║  ☐ Preparar terminal/bash
+║
+║  ETAPA 2: TESTE (3 minutos execução, 5 análise)
+║  ─────────────────────────────────────────────────────────────────────────
+║  ☐ Executar: python3 test_dtr_new_features.py EURUSD
+║  ☐ Aguardar ~3 minutos
+║  ☐ Anotar resultados:
+║     V1 win rate: ____%
+║     V2 win rate: ____%
+║     Diferença: ____%
+║  ☐ Verificar feature importance (smc_order_block importa?)
+║
+║  ETAPA 3: DECISÃO (2 minutos)
+║  ─────────────────────────────────────────────────────────────────────────
+║  V2 > V1 + 0.5% ?
+║  SIM → Implementar (30 min)
+║  NÃO → Manter v1 (nada a fazer)
+║
+║  ETAPA 4: IMPLEMENTAÇÃO (30 minutos) [SÓ SE V2 MELHOROU]
+║  ─────────────────────────────────────────────────────────────────────────
+║  ☐ Abrir: src/decision_tree_refiner.py
+║  ☐ Localizar função: build_direction_features()
+║  ☐ Adicionar antes do return:
+║     features_df['smc_order_block'] = df.get('smc_order_block', 0).astype(float)
+║     features_df['smc_fvg'] = df.get('smc_fvg', 0).astype(float)
+║  ☐ Salvar arquivo
+║  ☐ Testar: python3 src/backtest_chronological.py EURUSD
+║  ☐ Validar novo win rate
+║
+║  ETAPA 5: VALIDAÇÃO (5 minutos)
+║  ─────────────────────────────────────────────────────────────────────────
+║  ☐ Novo win rate >= 67.0% ?
+║  SIM → Commit à produção ✅
+║  NÃO → Reverter mudanças, manter v1 ❌
+║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║  ✅ RESPOSTA RÁPIDA: Uma Entrada Por Dia?                                    ║
+╠═══════════════════════════════════════════════════════════════════════════════╣
+║                                                                               ║
+║  Pergunta: DTR garante somente 1 entrada por dia?                            ║
+║  Resposta: SIM ✅                                                             ║
+║                                                                               ║
+║  Onde?   src/backtest_chronological.py linhas 331-341                        ║
+║  Como?   Marca PRIMEIRO 'FILTERED' como 'SEND' por dia                       ║
+║  Prova?  210 SEND em ~62 dias = 3.4 máximo/dia                               ║
+║                                                                               ║
+║  Precisa mudar? NÃO ❌ Funciona perfeitamente                                ║
+║                                                                               ║
+╚═══════════════════════════════════════════════════════════════════════════════╝

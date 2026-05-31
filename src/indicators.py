@@ -219,6 +219,43 @@ def calculate_all_indicators(df):
     df['macd_positive'] = (df['macd'] > 0).astype(int)
     df['momentum_positive'] = (df['momentum'] > 0).astype(int)
     
+    # Normalizar indicadores em percentual (para cada ativo, melhor pattern learning)
+    df = normalize_indicators_to_percentage(df)
+    
+    return df
+
+def normalize_indicators_to_percentage(df):
+    """Normaliza indicadores para percentual do preço (melhora pattern learning por ativo)"""
+    df = df.copy()
+    close = df['close'].clip(lower=1e-6)
+    
+    if 'sma20' in df.columns:
+        df['sma20_pct'] = ((df['close'] - df['sma20']) / df['sma20'].clip(lower=1e-6)) * 100
+    if 'sma50' in df.columns:
+        df['sma50_pct'] = ((df['close'] - df['sma50']) / df['sma50'].clip(lower=1e-6)) * 100
+    if 'ema12' in df.columns:
+        df['ema12_pct'] = ((df['close'] - df['ema12']) / df['ema12'].clip(lower=1e-6)) * 100
+    if 'ema26' in df.columns:
+        df['ema26_pct'] = ((df['close'] - df['ema26']) / df['ema26'].clip(lower=1e-6)) * 100
+    if 'macd' in df.columns:
+        df['macd_pct'] = (df['macd'] / close) * 100
+    if 'atr' in df.columns:
+        df['atr_pct'] = (df['atr'] / close) * 100
+    if 'momentum' in df.columns:
+        df['momentum_pct'] = (df['momentum'] / close) * 100
+    if 'sd' in df.columns:
+        df['sd_pct'] = (df['sd'] / close) * 100
+    if 'bb_width' in df.columns:
+        df['bb_width_pct'] = (df['bb_width'] / close) * 100
+    if 'kama' in df.columns:
+        df['kama_pct'] = ((df['close'] - df['kama']) / df['kama'].clip(lower=1e-6)) * 100
+    if 'smc_support' in df.columns:
+        df['smc_support_pct'] = ((df['close'] - df['smc_support']) / df['smc_support'].clip(lower=1e-6)) * 100
+    if 'smc_resistance' in df.columns:
+        df['smc_resistance_pct'] = ((df['smc_resistance'] - df['close']) / df['close'].clip(lower=1e-6)) * 100
+    
+    pct_cols = [col for col in df.columns if col.endswith('_pct')]
+    df[pct_cols] = df[pct_cols].fillna(0)
     return df
 
 def get_indicator_names():
@@ -243,13 +280,101 @@ def get_indicator_names():
         'all': continuous + binary
     }
 
+def calculate_sd_zones(df, vol_period=20):
+    """
+    Supply and Demand Zones - OTIMIZADA (operações vetorizadas)
+    Calcula níveis de suporte/resistência baseado em volatilidade
+    """
+    # Calcular volatilidade (operação vetorizada)
+    returns = df['close'].pct_change()
+    rolling_vol = returns.rolling(vol_period).std() * np.sqrt(96)  # M15: 96 barras/dia
+    
+    # Deslocar para obter vol do período anterior
+    vol_prev = rolling_vol.shift(1)
+    close_prev = df['close'].shift(1)
+    
+    # Calcular suporte e resistência (vetorizado)
+    offset = vol_prev * close_prev
+    support = close_prev - offset
+    resistance = close_prev + offset
+    
+    # Detectar proximidade (vetorizado)
+    current_price = df['close']
+    price_range = df['high'] - df['low']
+    
+    # Criar série de resultado
+    sd_zone = pd.Series(0, index=df.index)
+    
+    # Próximo a support
+    sd_zone[((current_price - support).abs() < price_range * 1.5) & (price_range > 0)] = -1
+    
+    # Próximo a resistance  
+    sd_zone[((current_price - resistance).abs() < price_range * 1.5) & (price_range > 0) & (sd_zone == 0)] = 1
+    
+    return sd_zone.fillna(0)
+
+def calculate_liquidity_sweep(df, lookback=8, atr_filter=0.5):
+    """
+    Liquidity Sweep Detection - OTIMIZADA (operações vetorizadas)
+    Detecta varreduras de liquidez (highs/lows tocados e revertidos)
+    """
+    # Rolling max/min dos últimos lookback candles
+    rolling_high = df['high'].rolling(lookback).max().shift(1)  # Shift 1 para não usar futuro
+    rolling_low = df['low'].rolling(lookback).min().shift(1)
+    
+    # ATR ou fallback
+    atr = df.get('atr', df['high'] - df['low']) if 'atr' in df.columns else (df['high'] - df['low'])
+    
+    sweep = pd.Series(0, index=df.index)
+    
+    # Bearish sweep: high > rolling_high E close < (rolling_high - atr*0.15)
+    bearish_condition = (df['high'] > rolling_high) & (df['close'] < (rolling_high - atr * 0.15))
+    sweep[bearish_condition] = -1
+    
+    # Bullish sweep: low < rolling_low E close > (rolling_low + atr*0.15)
+    bullish_condition = (df['low'] < rolling_low) & (df['close'] > (rolling_low + atr * 0.15))
+    sweep[bullish_condition] = 1
+    
+    return sweep.fillna(0)
+
+def calculate_market_regime(df, window=10):
+    """
+    Market Regime Detection - OTIMIZADA (operações vetorizadas)
+    Detecta regime: TREND_BULL, TREND_BEAR, RANGE, MANIPULATION
+    """
+    if 'er' not in df.columns or 'kama' not in df.columns:
+        return pd.Series(0, index=df.index).fillna(0)
+    
+    # Calcular ER médio (rolling window)
+    er_rolling = df['er'].rolling(window).mean()
+    
+    # Calcular slope do KAMA
+    kama_slope = df['kama'].diff(window)
+    
+    # Criar série de regime
+    regime = pd.Series(0, index=df.index)
+    
+    # TREND_BULL: ER > 0.45 E slope > 0
+    regime[(er_rolling > 0.45) & (kama_slope > 0)] = 1
+    
+    # TREND_BEAR: ER > 0.45 E slope < 0
+    regime[(er_rolling > 0.45) & (kama_slope < 0)] = -1
+    
+    # RANGE: ER < 0.25
+    regime[(er_rolling < 0.25)] = 0
+    
+    # MANIPULATION: else (ER entre 0.25-0.45)
+    regime[(regime == 0) & (er_rolling >= 0.25) & (er_rolling <= 0.45)] = 2
+    
+    return regime.fillna(0)
+
 def get_model_features():
     """Retorna lista de features para o modelo (sem target)"""
     # Features recomendadas para o modelo
     # Evita multicolinearidade e mantém features significativas
     return [
         'rsi', 'sma20', 'sma50', 'macd', 'atr', 'momentum',
-        'er', 'kama', 'realized_vol',  # Novos do backup
+        'er', 'kama', 'realized_vol',
         'sd', 'bb_width',
         'smc_support', 'smc_resistance',
         'price_above_sma20', 'price_above_sma50',

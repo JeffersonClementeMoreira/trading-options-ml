@@ -1,0 +1,196 @@
+
+================================================================================
+🚀 BACKTEST SIMPLIFICADO - TOP 6 INDICADORES
+   Ensemble: XGBoost + RandomForest
+   Features: TOP 6 apenas (realized_vol, kama, smc_support, sma50, smc_resistance, sma20)
+   Thresholds: Otimizados por ativo
+   Split: 70% treino | 30% teste
+================================================================================
+
+
+================================================================================
+📁 EURUSD
+================================================================================
+📊 Calculando indicadores...
+⏰ Calculando target...
+📊 Distribuição: 23006 BUYs | 25881 SELLs | Ratio: 0.89
+✅ 48,887 candles | 2024-01-01 22:15:00 → 2026-05-21 23:45:00
+✅ Split: 34,220 treino | 14,667 teste
+   Split: 70% treino | 30% teste
+
+────────────────────────────────────────────────────────────────────────────────
+🤖 Treinando Ensemble (70% treino)
+────────────────────────────────────────────────────────────────────────────────
+🔹 XGBoost Classifier (scale_pos_weight=1.08)
+   ✅ Treinado
+🔹 RandomForest Classifier (class_weight='balanced')
+   ✅ Treinado
+
+────────────────────────────────────────────────────────────────────────────────
+🔮 Predição no Teste (30%)
+────────────────────────────────────────────────────────────────────────────────
+
+✅ RESULTADOS FINAIS (Threshold=0.85):
+   Accuracy: 0.5527
+   Precision: 1.0000
+   Recall: 0.0024
+   F1-Score: 0.0049
+   ─────────────────
+   Wins: 8,089 | Losses: 6,561
+   Win Rate: 55.22%
+   Total Pips: 13,658
+   Avg Pips/Trade: 1
+   Profit Factor: 1.06x
+
+
+================================================================================
+📁 GBPUSD
+================================================================================
+📊 Calculando indicadores...
+⏰ Calculando target...
+📊 Distribuição: 24404 BUYs | 24481 SELLs | Ratio: 1.00
+✅ 48,885 candles | 2024-01-01 22:15:00 → 2026-05-21 23:45:00
+✅ Split: 34,219 treino | 14,666 teste
+   Split: 70% treino | 30% teste
+
+────────────────────────────────────────────────────────────────────────────────
+🤖 Treinando Ensemble (70% treino)
+────────────────────────────────────────────────────────────────────────────────
+🔹 XGBoost Classifier (scale_pos_weight=0.97)
+   ✅ Treinado
+🔹 RandomForest Classifier (class_weight='balanced')
+   ✅ Treinado
+
+────────────────────────────────────────────────────────────────────────────────
+🔮 Predição no Teste (30%)
+────────────────────────────────────────────────────────────────────────────────
+
+✅ RESULTADOS FINAIS (Threshold=0.7):
+   Accuracy: 0.5273
+   Precision: 0.5144
+   Recall: 0.1554
+   F1-Score: 0.2387
+   ─────────────────
+   Wins: 7,723 | Losses: 6,932
+   Win Rate: 52.70%
+   Total Pips: 37,616
+   Avg Pips/Trade: 3
+   Profit Factor: 1.12x
+
+
+================================================================================
+📁 EURAUD
+================================================================================
+📊 Calculando indicadores...
+⏰ Calculando target...
+📊 Distribuição: 25080 BUYs | 23792 SELLs | Ratio: 1.05
+✅ 48,872 candles | 2024-01-01 22:15:00 → 2026-05-21 23:45:00
+✅ Split: 34,210 treino | 14,662 teste
+   Split: 70% treino | 30% teste
+
+────────────────────────────────────────────────────────────────────────────────
+🤖 Treinando Ensemble (70% treino)
+────────────────────────────────────────────────────────────────────────────────
+🔹 XGBoost Classifier (scale_pos_weight=0.86)
+   ✅ Treinado
+🔹 RandomForest Classifier (class_weight='balanced')
+   ✅ Treinado
+
+────────────────────────────────────────────────────────────────────────────────
+🔮 Predição no Teste (30%)
+────────────────────────────────────────────────────────────────────────────────
+
+✅ RESULTADOS FINAIS (Threshold=0.9):
+   Accuracy: 0.5374
+   Precision: 0.3733
+   Recall: 0.0162
+   F1-Score: 0.0311
+   ─────────────────
+   Wins: 7,871 | Losses: 6,783
+   Win Rate: 53.71%
+   Total Pips: 100,068
+   Avg Pips/Trade: 7
+   Profit Factor: 1.30x
+
+
+================================================================================
+📁 NZDUSD
+================================================================================
+📊 Calculando indicadores...
+⏰ Calculando target...
+📊 Distribuição: 23298 BUYs | 25588 SELLs | Ratio: 0.91
+✅ 48,886 candles | 2024-01-01 22:15:00 → 2026-05-21 23:45:00
+✅ Split: 34,220 treino | 14,666 teste
+   Split: 70% treino | 30% teste
+
+────────────────────────────────────────────────────────────────────────────────
+🤖 Treinando Ensemble (70% treino)
+────────────────────────────────────────────────────────────────────────────────
+🔹 XGBoost Classifier (scale_pos_weight=1.14)
+   ✅ Treinado
+🔹 RandomForest Classifier (class_weight='balanced')
+   ✅ Treinado
+
+────────────────────────────────────────────────────────────────────────────────
+🔮 Predição no Teste (30%)
+────────────────────────────────────────────────────────────────────────────────
+
+✅ RESULTADOS FINAIS (Threshold=0.5):
+   Accuracy: 0.4671
+   Precision: 0.4602
+   Recall: 0.3781
+   F1-Score: 0.4151
+   ─────────────────
+   Wins: 6,830 | Losses: 7,803
+   Win Rate: 46.68%
+   Total Pips: -292
+   Avg Pips/Trade: -0
+   Profit Factor: 1.00x
+
+
+================================================================================
+📁 EURJPY
+================================================================================
+📊 Calculando indicadores...
+⏰ Calculando target...
+📊 Distribuição: 27168 BUYs | 21715 SELLs | Ratio: 1.25
+✅ 48,883 candles | 2024-01-01 22:15:00 → 2026-05-21 23:45:00
+✅ Split: 34,218 treino | 14,665 teste
+   Split: 70% treino | 30% teste
+
+────────────────────────────────────────────────────────────────────────────────
+🤖 Treinando Ensemble (70% treino)
+────────────────────────────────────────────────────────────────────────────────
+🔹 XGBoost Classifier (scale_pos_weight=0.80)
+   ✅ Treinado
+🔹 RandomForest Classifier (class_weight='balanced')
+   ✅ Treinado
+
+────────────────────────────────────────────────────────────────────────────────
+🔮 Predição no Teste (30%)
+────────────────────────────────────────────────────────────────────────────────
+
+✅ RESULTADOS FINAIS (Threshold=0.5):
+   Accuracy: 0.4465
+   Precision: 0.5415
+   Recall: 0.0542
+   F1-Score: 0.0986
+   ─────────────────
+   Wins: 6,542 | Losses: 8,117
+   Win Rate: 44.63%
+   Total Pips: -10,123,110
+   Avg Pips/Trade: -690
+   Profit Factor: 0.77x
+
+
+================================================================================
+📊 RESUMO FINAL - MODELO SIMPLIFICADO (TOP 6)
+================================================================================
+
+EURUSD   | 55.22% win rate |     13,658 pips | 1.06x profit
+GBPUSD   | 52.70% win rate |     37,616 pips | 1.12x profit
+EURAUD   | 53.71% win rate |    100,068 pips | 1.30x profit
+NZDUSD   | 46.68% win rate |       -292 pips | 1.00x profit
+EURJPY   | 44.63% win rate | -10,123,110 pips | 0.77x profit
+
+📈 MÉDIA (5 ativos): 50.59% win rate | -9,972,060 pips total
