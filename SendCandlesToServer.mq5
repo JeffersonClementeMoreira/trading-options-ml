@@ -92,8 +92,10 @@ void SendLastRealCandle(string symbol)
     long candle_volume = volume[0];
     
     // Formatar timestamp: "YYYY.MM.DD HH:MM:SS"
-    string time_str = TimeToString(candle_time, TIME_DATE | TIME_MINUTES);
-    string datetime_str = StringSubstr(time_str, 0, 10) + " " + StringSubstr(time_str, 11, 5) + ":00";
+    MqlDateTime dt;
+    TimeToStruct(candle_time, dt);
+    string datetime_str = StringFormat("%04d.%02d.%02d %02d:%02d:00", 
+                                        dt.year, dt.mon, dt.day, dt.hour, dt.min);
     
     // Criar JSON manualmente (sem biblioteca)
     string json_str = "{";
@@ -107,11 +109,13 @@ void SendLastRealCandle(string symbol)
     json_str += "}";
     
     // Enviar HTTP POST
-    char post_data[];
-    char result[];
+    uchar post_data[];
+    uchar result[];
     string headers = "Content-Type: application/json\r\n";
     
-    StringToCharArray(json_str, post_data);
+    int json_len = StringLen(json_str);
+    ArrayResize(post_data, json_len + 1);
+    StringToCharArray(json_str, post_data, 0, json_len);
     
     int ret = WebRequest(
         "POST",
@@ -147,10 +151,14 @@ void Log(string msg)
     
     if (!LogToFile) return;
     
-    int file = FileOpen(logFile, FILE_READ | FILE_WRITE | FILE_CSV);
+    int file = FileOpen("SendCandlesToServer.log", FILE_READ | FILE_WRITE | FILE_CSV);
     if (file != INVALID_HANDLE) {
         FileSeek(file, 0, SEEK_END);
-        FileWrite(file, TimeToString(TimeCurrent()) + " " + msg);
+        MqlDateTime dt;
+        TimeToStruct(TimeCurrent(), dt);
+        string time_log = StringFormat("%04d.%02d.%02d %02d:%02d:%02d", 
+                                       dt.year, dt.mon, dt.day, dt.hour, dt.min, dt.sec);
+        FileWrite(file, time_log + " " + msg);
         FileClose(file);
     }
 }
