@@ -116,10 +116,10 @@ void SendLastRealCandle(string symbol)
     StringToCharArray(json_str, post_data);
     
     int ret = WebRequest(
-        "POST",
-        ServerURL,
+        ServerURL,    // URL primeiro!
+        "POST",       // depois método
         headers,
-        30000,  // timeout 30s
+        30000,
         post_data,
         result
     );
