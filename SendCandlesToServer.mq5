@@ -202,8 +202,15 @@ void SendLastRealCandle(string symbol)
     string result_headers;
     string headers = "Content-Type: application/json";
     
-    // Converter string para uchar array
-    StringToCharArray(json_str, post_data);
+    // Limpar array e converter com tamanho exato
+    ArrayFree(post_data);
+    ArrayResize(post_data, 0);
+    
+    int json_len = StringLen(json_str);
+    ArrayResize(post_data, json_len);
+    for(int j = 0; j < json_len; j++) {
+        post_data[j] = (uchar)json_str[j];
+    }
     
     // WebRequest com assinatura correta
     int ret = WebRequest("POST", ServerURL, headers, 30000, post_data, result, result_headers);
