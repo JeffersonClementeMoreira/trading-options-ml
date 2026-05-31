@@ -126,7 +126,16 @@ void SendHistoricalCandles(string symbol)
         string result_headers;
         string headers = "Content-Type: application/json";
         
-        StringToCharArray(json_str, post_data);
+        // Limpar array
+        ArrayFree(post_data);
+        ArrayResize(post_data, 0);
+        
+        // Converter com tamanho exato
+        int json_len = StringLen(json_str);
+        ArrayResize(post_data, json_len);
+        for(int j = 0; j < json_len; j++) {
+            post_data[j] = (uchar)json_str[j];
+        }
         
         int ret = WebRequest("POST", ServerURL, headers, 30000, post_data, result, result_headers);
         
