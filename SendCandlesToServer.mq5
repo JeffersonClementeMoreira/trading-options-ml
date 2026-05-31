@@ -4,7 +4,7 @@
 //+------------------------------------------------------------------+
 #property copyright "Trading ML System"
 #property link      "https://github.com/JeffersonClementeMoreira/trading-options-ml"
-#property version   "2.03"
+#property version   "2.04"
 #property strict
 #property description "Envia último candle M15 REAL fechado para servidor HTTP"
 
