@@ -36,11 +36,18 @@ from indicators import calculate_all_indicators, get_model_features
 app = Flask(__name__)
 CORS(app)
 
+# Log com rotação: máx 5MB por arquivo, 3 backups = máx 15MB total
+from logging.handlers import RotatingFileHandler
+
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
-        logging.FileHandler('/tmp/mt5_live_real.log'),
+        RotatingFileHandler(
+            '/tmp/mt5_live_real.log',
+            maxBytes=5*1024*1024,  # 5MB
+            backupCount=3
+        ),
         logging.StreamHandler()
     ]
 )
